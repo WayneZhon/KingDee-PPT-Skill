@@ -249,9 +249,300 @@ slide.addText([
 ], { ... });
 ```
 
+
 ---
 
-## 8. 字体降级说明
+## 10. lobe-icons AI 品牌 Logo 嵌入模块
+
+> 当内容脚本含有 `[logo: slug]` 标注时，必须执行以下流程将 lobe-icons 图标嵌入 PPTX。
+
+### 10.1 依赖安装
+
+```bash
+# sharp 用于 SVG → PNG 转换（必须）
+npm install sharp --save
+```
+
+### 10.2 Logo 抓取与缓存函数
+
+在 `build_pptx.js` 顶部（require 区域后）加入：
+
+```javascript
+const https = require('https');
+const sharp = require('sharp');
+const path  = require('path');
+
+// ── lobe-icons CDN 配置 ──────────────────────────────────────────
+const LOBE_CDN_PRIMARY  = 'https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons';
+const LOBE_CDN_FALLBACK = 'https://unpkg.com/@lobehub/icons-static-svg@latest/icons';
+const LOBE_PNG_CDN      = 'https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/icons';
+const LOBE_CACHE_DIR    = '/home/claude/lobe_cache';
+
+// 确保缓存目录存在
+if (!fs.existsSync(LOBE_CACHE_DIR)) fs.mkdirSync(LOBE_CACHE_DIR, { recursive: true });
+
+/**
+ * 从 URL 拉取内容，返回 Buffer
+ */
+function fetchUrl(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      if (res.statusCode === 301 || res.statusCode === 302) {
+        return fetchUrl(res.headers.location).then(resolve).catch(reject);
+      }
+      if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}: ${url}`));
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => resolve(Buffer.concat(chunks)));
+      res.on('error', reject);
+    }).on('error', reject);
+  });
+}
+
+/**
+ * 加载单个 lobe-icon，返回 "image/png;base64,xxxx" 字符串
+ * 优先级：主 CDN SVG → 备用 CDN SVG → PNG CDN
+ * 失败时返回 null（由调用方决定是否跳过）
+ */
+async function loadLobeIcon(slug, sizePx = 64) {
+  const cacheFile = path.join(LOBE_CACHE_DIR, `${slug}_${sizePx}.png`);
+
+  // 命中本地缓存
+  if (fs.existsSync(cacheFile)) {
+    return 'image/png;base64,' + fs.readFileSync(cacheFile).toString('base64');
+  }
+
+  const attempts = [
+    `${LOBE_CDN_PRIMARY}/${slug}.svg`,
+    `${LOBE_CDN_FALLBACK}/${slug}.svg`,
+  ];
+
+  for (const url of attempts) {
+    try {
+      const svgBuf = await fetchUrl(url);
+      // SVG → PNG（sharp 处理，统一输出 sizePx × sizePx）
+      const pngBuf = await sharp(svgBuf)
+        .resize(sizePx, sizePx, { fit: 'contain', background: { r:0,g:0,b:0,alpha:0 } })
+        .png()
+        .toBuffer();
+      fs.writeFileSync(cacheFile, pngBuf);
+      return 'image/png;base64,' + pngBuf.toString('base64');
+    } catch (_) { /* 继续尝试下一个 */ }
+  }
+
+  // SVG 全失败 → 尝试 PNG CDN
+  try {
+    const pngUrl = `${LOBE_PNG_CDN}/${slug}.png`;
+    const pngBuf = await fetchUrl(pngUrl);
+    // 用 sharp 缩放到目标尺寸
+    const resized = await sharp(pngBuf)
+      .resize(sizePx, sizePx, { fit: 'contain', background: { r:0,g:0,b:0,alpha:0 } })
+      .png()
+      .toBuffer();
+    fs.writeFileSync(cacheFile, resized);
+    return 'image/png;base64,' + resized.toString('base64');
+  } catch (_) {}
+
+  console.warn(`⚠️ lobe-icon 加载失败，跳过: ${slug}`);
+  return null;
+}
+
+/**
+ * 批量预加载，返回 Map<slug, base64String|null>
+ * 在 main() 开始时调用，避免幻灯片构建中串行等待
+ */
+async function preloadLobeIcons(slugs, sizePx = 64) {
+  const unique = [...new Set(slugs)];
+  const results = await Promise.all(unique.map(s => loadLobeIcon(s, sizePx)));
+  const map = {};
+  unique.forEach((s, i) => { map[s] = results[i]; });
+  return map;
+}
+```
+
+---
+
+### 10.3 幻灯片中插入 Logo 的三种模式
+
+**模式 A：Bento 卡片左上角 Logo**
+
+```javascript
+// 在 bentoCard 函数内，卡片左上角插入 logo
+async function bentoCardWithLogo(slide, opts, logoMap) {
+  const { x, y, w, h, slug, title, bullets, bgColor, textColor } = opts;
+
+  // 绘制卡片色块
+  slide.addShape(pres.ShapeType.rect, {
+    x, y, w, h,
+    fill: { color: bgColor },
+    line: { type: 'none' },
+    shadow: mkShS(),
+  });
+
+  const logoData = slug ? logoMap[slug] : null;
+  const logoSize = 0.42; // 英寸
+  const logoX = x + 0.18;
+  const logoY = y + 0.18;
+
+  if (logoData) {
+    slide.addImage({
+      data: logoData,
+      x: logoX, y: logoY,
+      w: logoSize, h: logoSize,
+    });
+  }
+
+  // 标题（logo 右侧或 logo 下方）
+  const titleX = logoData ? logoX + logoSize + 0.12 : x + 0.18;
+  const titleY = logoData ? logoY + (logoSize - 0.28) / 2 : y + 0.18;
+
+  slide.addText(title, {
+    x: titleX, y: titleY,
+    w: w - (titleX - x) - 0.18, h: 0.36,
+    fontSize: 13, bold: true,
+    color: textColor || (bgColor === '1770EA' || bgColor === '00CBFF' ? 'FFFFFF' : '1A1A3E'),
+    fontFace: 'Microsoft YaHei',
+    valign: 'middle',
+  });
+
+  // 要点列表（卡片下半区）
+  if (bullets && bullets.length) {
+    const bulletY = logoY + logoSize + 0.12;
+    slide.addText(bullets.map(b => ({ text: b, options: { breakLine: true } })), {
+      x: x + 0.18, y: bulletY,
+      w: w - 0.36, h: h - (bulletY - y) - 0.12,
+      fontSize: 11,
+      color: textColor || (bgColor === '1770EA' ? 'FFFFFF' : '555555'),
+      fontFace: 'Microsoft YaHei',
+      valign: 'top',
+      lineSpacingMultiple: 1.35,
+    });
+  }
+}
+```
+
+**模式 B：Logo 墙（合作伙伴横排展示）**
+
+```javascript
+// 在幻灯片底部生成横排 logo 墙
+// slugsWithLabels: [{slug:'huawei', label:'华为云'}, ...]
+async function addLogoWall(slide, y_start, slugsWithLabels, logoMap) {
+  const count = slugsWithLabels.length;
+  if (count === 0) return;
+
+  // 背景条
+  slide.addShape(pres.ShapeType.rect, {
+    x: 0.5, y: y_start, w: 12.33, h: 1.35,
+    fill: { color: 'F4F6FB' },
+    line: { color: 'E0E6F0', pt: 1 },
+    rounding: 0.08,
+  });
+
+  const itemW = 12.33 / count;
+  for (let i = 0; i < count; i++) {
+    const { slug, label } = slugsWithLabels[i];
+    const cx = 0.5 + itemW * i + itemW / 2;
+    const logoSize = 0.48;
+    const logoX = cx - logoSize / 2;
+    const logoY = y_start + 0.18;
+
+    const logoData = logoMap[slug];
+    if (logoData) {
+      slide.addImage({ data: logoData, x: logoX, y: logoY, w: logoSize, h: logoSize });
+    }
+
+    // 品牌名标签
+    if (label) {
+      slide.addText(label, {
+        x: logoX - 0.1, y: logoY + logoSize + 0.06,
+        w: logoSize + 0.2, h: 0.22,
+        fontSize: 9.5, color: '888888',
+        fontFace: 'Microsoft YaHei',
+        align: 'center',
+      });
+    }
+  }
+}
+```
+
+**模式 C：要点列表行首 Logo（替代项目符号）**
+
+```javascript
+// 每条要点前放小 logo，用于技术选型/对比类页面
+async function addBulletWithLogo(slide, items, opts, logoMap) {
+  // items: [{slug:'openai', text:'GPT-4o 负责长文档理解'}, ...]
+  const { x, y, w, lineH = 0.42 } = opts;
+  const iconSize = 0.28;
+
+  for (let i = 0; i < items.length; i++) {
+    const { slug, text } = items[i];
+    const itemY = y + i * (lineH + 0.08);
+
+    const logoData = slug ? logoMap[slug] : null;
+    if (logoData) {
+      slide.addImage({ data: logoData, x, y: itemY + (lineH - iconSize) / 2, w: iconSize, h: iconSize });
+    }
+
+    slide.addText(text, {
+      x: x + (logoData ? iconSize + 0.1 : 0),
+      y: itemY, w: w - (logoData ? iconSize + 0.1 : 0), h: lineH,
+      fontSize: 14, color: '333333',
+      fontFace: 'Microsoft YaHei',
+      valign: 'middle',
+    });
+  }
+}
+```
+
+---
+
+### 10.4 main() 函数集成模式
+
+```javascript
+async function main() {
+  const pres = new pptxgen();
+  pres.layout = 'LAYOUT_WIDE';
+
+  // ── 第一步：收集本次 PPT 所有需要的 lobe-icons slug ──
+  // （从内容脚本的 [logo: xxx] 标注中整理）
+  // ⚠️ 常见易错 slug：
+  //   Llama/Meta AI → 'metaai'（不是 'llama'）
+  //   华为云        → 'huaweicloud'（不是 'huawei'，后者是华为集团）
+  //   阿里云        → 'alibabacloud'（不是 'alibaba'，后者是阿里巴巴集团）
+  //   MCP 协议      → 'mcp'  ← Skill 生态必备
+  const ALL_SLUGS = ['huaweicloud', 'alibabacloud', 'deepseek', 'openai', 'claude', 'mcp'];  // 按实际填写
+
+  // ── 第二步：批量预加载（并发拉取，提速）──
+  console.log(`⏳ 预加载 ${ALL_SLUGS.length} 个 lobe-icons...`);
+  const LOGOS = await preloadLobeIcons(ALL_SLUGS, 64);
+  const loaded = Object.values(LOGOS).filter(Boolean).length;
+  console.log(`✓ lobe-icons 加载完成：${loaded}/${ALL_SLUGS.length}`);
+
+  // ── 第三步：构建幻灯片时传入 LOGOS map ──
+  let pg = 1;
+  // addCoverSlide(pres, A, {...}, pg++);
+  // await addBentoWithLogoSlide(pres, A, LOGOS, {...}, pg++);
+  // ...
+
+  await pres.writeFile({ fileName: 'output.pptx' });
+  console.log(`✓ output.pptx 完成`);
+}
+main().catch(e => { console.error(e); process.exit(1); });
+```
+
+---
+
+### 10.5 视觉 QA 补充检查（lobe-icons 专项）
+
+| 检查项 | 标准 |
+|--------|------|
+| Logo 是否渲染 | 每个标注了 `[logo:]` 的卡片/行，图标是否正常显示 |
+| 尺寸一致性 | 同一页的 logo 尺寸是否统一（误差 < 0.02"） |
+| 背景对比 | 深色卡片上 logo 是否可辨（彩色 logo 在深蓝底上是否清晰） |
+| 文字位移 | logo 的存在是否导致文字挤出卡片边界 |
+| 加载失败降级 | 加载失败的 slug 是否被静默跳过，不出现破图或占位符 |
+
+
 
 Linux 沙箱可能无微软雅黑，LibreOffice 转 PDF 时自动匹配相近字体，可能造成 ±0.05" 轻微排版偏差。`Segoe UI Emoji` 在 Linux 环境下可能降级为 Noto Emoji，图标字符视觉效果基本一致。最终在 Windows/Mac PowerPoint 中打开效果最优。
 
