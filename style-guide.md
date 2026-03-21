@@ -21,7 +21,7 @@ pres.layout = 'LAYOUT_WIDE';
 |------|-----|------|
 | 主品牌蓝 | `1770EA` | accent1：标题、强调、TOC序号、页码、Bento主卡 |
 | 亮青色 | `00CBFF` | accent2：章节大数字、辅助强调 |
-| 章节数字青 | `46CCFE` | 章节页超大数字（从 layout XML 直接提取） |
+| 章节数字青 | `00CCFE` | 章节页超大数字 + 装饰横线（标题/副标题均为白色） |
 | 深品牌蓝 | `005392` | dk2：深色辅助、架构图底层 |
 
 ### 辅助色系
@@ -59,19 +59,20 @@ const COLOR_SEQ = ['1770EA', '00CBFF', '00C7C7', 'AF6EFF', 'FFC000'];
 ## 3. 字体规范
 
 ```javascript
-const FONT     = 'Microsoft YaHei';   // 中英文统一，备用：微软雅黑
-const FONT_NUM = 'Helvetica Neue';    // 纯数字/英文大数字
-const FONT_ICO = 'Segoe UI Emoji';   // 图标字符（Windows）；macOS 用 Apple Color Emoji
+const FONT = 'Microsoft YaHei';   // 全局唯一字体，所有文字元素（中英文/数字/图标）均使用
+// ⚠️ 禁止使用任何其他字体（Helvetica、Arial、Calibri 等）
 ```
 
 | 文字类型 | 字号 | 字重 | 颜色 | 备注 |
 |---------|------|------|------|------|
-| 页面标题（Title）| 24pt | 加粗 | `262626` | 从 layout3 提取 |
-| 副标题 | 16pt | 普通 | `888888` | — |
+| 页面标题（Title）| 24pt | 加粗 | `262626` | 内容页标题 |
+| 副标题 | 16pt | 普通 | `888888` | 内容页副标题 |
 | 内容正文 | 18pt | 普通 | `262626` | 行距 1.3× |
 | 重点强调 | 20pt | 加粗 | `1770EA` 或 `FFC000` | — |
-| **超大数字（Bento/看板）** | **120-160pt** | 加粗 | `1770EA` | Helvetica Neue |
-| 章节大数字 | **125pt** | 加粗 | `46CCFE` | sz=12500 |
+| **超大数字（Bento/看板）** | **120-160pt** | 加粗 | `1770EA` | — |
+| 章节大数字 | **125pt** | 加粗 | `00CCFE` | sz=12500 |
+| 章节标题 | **24pt** | 加粗 | `FFFFFF` | 章节分隔页 |
+| 章节副标题 | **16pt** | 普通 | `FFFFFF` | 章节分隔页 |
 | TOC 章节编号 | 80pt | 加粗 | `1770EA` | — |
 | 金句正文 | 28-36pt | 普通 | `262626` | 居中对齐 |
 | 卡片标题 | 16-18pt | 加粗 | `1770EA` 或 `FFFFFF` | — |
@@ -263,7 +264,7 @@ function bentoCard(slide, pres, opts) {
   if (icon) {
     slide.addText(icon, {
       x: x + 0.18, y: textY, w: 0.5, h: 0.5,
-      fontSize: 22, fontFace: 'Segoe UI Emoji',
+      fontSize: 22, fontFace: 'Microsoft YaHei',
       color: fillColor === '1770EA' ? 'FFFFFF' : '1770EA',
       valign: 'middle', align: 'center', margin: 0,
     });
@@ -296,15 +297,14 @@ function bentoCard(slide, pres, opts) {
 
 ## 10. iconfont 图标规范
 
-> **方案选型**：使用系统内置 Emoji（Segoe UI Emoji / Apple Color Emoji），配合 PptxGenJS `addText` 直接渲染，跨平台稳定、无需外部字体文件。
+> **方案选型**：图标字符统一使用 `Microsoft YaHei`，配合 PptxGenJS `addText` 直接渲染，跨平台一致。
 
 ---
 
 ### 10.1 字体声明
 
 ```javascript
-const FONT_ICO = 'Segoe UI Emoji';  // Windows（pptx 标准环境）
-// macOS 预览时自动回退 Apple Color Emoji，效果等价
+const FONT_ICO = 'Microsoft YaHei';  // 图标字符统一使用微软雅黑
 ```
 
 ---
@@ -452,7 +452,7 @@ function addIconBadge(slide, pres, cx, cy, r, icon, bgColor = '1770EA', onDark =
     x: cx - r, y: cy - r,
     w: r * 2, h: r * 2,
     fontSize: Math.round(r * 72 * 0.9),   // 字号 = 半径 × 0.9 × 72
-    fontFace: 'Segoe UI Emoji',
+    fontFace: 'Microsoft YaHei',
     color: onDark ? 'FFFFFF' : '1770EA',
     align: 'center', valign: 'middle', margin: 0,
   });
@@ -471,7 +471,7 @@ addIconBadge(slide, pres, cardX + 0.42, cardY + 0.42, 0.30, '📊');
 slide.addText('📊', {
   x: cardX + 0.15, y: cardY + 0.18,
   w: 0.48, h: 0.48,
-  fontSize: 26, fontFace: 'Segoe UI Emoji',
+  fontSize: 26, fontFace: 'Microsoft YaHei',
   color: 'FFFFFF',
   align: 'center', valign: 'middle', margin: 0,
 });
@@ -480,7 +480,7 @@ slide.addText('📊', {
 slide.addText('💡', {
   x: cardX + 0.15, y: cardY + 0.18,
   w: 0.48, h: 0.48,
-  fontSize: 26, fontFace: 'Segoe UI Emoji',
+  fontSize: 26, fontFace: 'Microsoft YaHei',
   color: '1770EA',
   align: 'center', valign: 'middle', margin: 0,
 });
@@ -572,7 +572,7 @@ function addProgressRing(slide, pres, cx, cy, r, percent, color = '1770EA') {
   slide.addText(`${Math.round(percent * 100)}%`, {
     x: cx - r, y: cy - 0.25, w: r * 2, h: 0.5,
     fontSize: 20, bold: true, color,
-    fontFace: 'Helvetica Neue', align: 'center', margin: 0,
+    fontFace: 'Microsoft YaHei', align: 'center', margin: 0,
   });
 }
 ```
@@ -598,10 +598,11 @@ function addProgressRing(slide, pres, cx, cy, r, percent, color = '1770EA') {
 ## 13. 章节分隔页规范（从 slideLayout5 XML 精确提取）
 
 ```javascript
-// 大数字：sz=12500（125pt），color=#46CCFE，bold=true
+// 大数字：sz=12500（125pt），color=#00CCFE，bold=true
 // 位置：x=0.403" y=0.284" w=2.365" h=2.205"
-// 红色装饰横线：x=0.603" y=2.489" w=0.876" h=0.096"
+// 品青装饰横线：x=0.603" y=2.489" w=0.876" h=0.096"，fill=#00CCFE（⚠️ 非红色）
 // 章节标题：x=0.516" y=2.970" w=10.870" h=0.667"（24pt 白色加粗）
+// 副标题：x=0.516" y=3.626" w=5.167" h=1.320"（16pt，color=#FFFFFF 白色）
 ```
 
 ---
