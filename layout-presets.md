@@ -11,6 +11,9 @@
 const pptxgen = require('pptxgenjs');
 const fs = require('fs');
 
+// ─── 全局字体（所有 addText 必须使用，禁止使用其他字体）───────────
+const FONT = 'Microsoft YaHei';
+
 // ─── 资源加载 ────────────────────────────────────────────────────
 function loadAsset(filename) {
   const ext = filename.split('.').pop().toLowerCase();
@@ -121,7 +124,7 @@ function bentoCard(pres, slide, opts) {
   if (icon) {
     slide.addText(icon, {
       x: x + pad, y: curY, w: 0.52, h: 0.52,
-      fontSize: 24, fontFace: 'Segoe UI Emoji',
+      fontSize: 24, fontFace: 'Microsoft YaHei',
       color: titleColor, align: 'center', valign: 'middle', margin: 0,
     });
     curY += 0.58;
@@ -133,7 +136,7 @@ function bentoCard(pres, slide, opts) {
     slide.addText(bigNumber, {
       x: x + pad, y: curY, w: w - pad * 2, h: 1.20,
       fontSize: numSize, bold: true, color: numberColor,
-      fontFace: 'Helvetica Neue', valign: 'middle', margin: 0,
+      fontFace: 'Microsoft YaHei', valign: 'middle', margin: 0,
     });
     curY += 1.28;
   }
@@ -214,10 +217,10 @@ function addTOCSlide(pres, A, sections, pageNum) {
   ];
   sections.slice(0, 4).forEach((sec, i) => {
     const row = ROW_Y[i];
-    s.addText(sec.num, { x:0.429, y:row.numY, w:1.151, h:0.908, fontSize:80, color:'1770EA', bold:true, fontFace:'Helvetica Neue', margin:0, valign:'top' });
+    s.addText(sec.num, { x:0.429, y:row.numY, w:1.151, h:0.908, fontSize:80, color:'1770EA', bold:true, fontFace:'Microsoft YaHei', margin:0, valign:'top' });
     s.addText(sec.title, { x:1.791, y:row.titleY, w:7.221, h:0.449, fontSize:20, color:'262626', bold:true, fontFace:'Microsoft YaHei', margin:0, valign:'middle' });
     if (sec.sub) s.addText(sec.sub, { x:1.791, y:row.subY, w:7.221, h:0.312, fontSize:13, color:'888888', fontFace:'Microsoft YaHei', margin:0 });
-    s.addText(`P  ${String(sec.page).padStart(2,'0')}`, { x:11.008, y:row.pageY, w:1.327, h:0.443, fontSize:14, color:'1770EA', fontFace:'Helvetica Neue', align:'right', margin:0 });
+    s.addText(`P  ${String(sec.page).padStart(2,'0')}`, { x:11.008, y:row.pageY, w:1.327, h:0.443, fontSize:14, color:'1770EA', fontFace:'Microsoft YaHei', align:'right', margin:0 });
     if (i < sections.length - 1) s.addShape(pres.ShapeType.line, { x:1.791, y:row.subY+0.35, w:10.5, h:0, line:{ color:'DDDDDD', width:0.5 } });
   });
   addFooter(s, pageNum, false);
@@ -233,10 +236,10 @@ function addSectionSlide(pres, A, { num, title, subtitle, bgData }, pageNum) {
   const s = pres.addSlide();
   s.addImage({ data: bgData, x:0, y:0, w:13.333, h:7.516 });
   addLogo(s, A, true);
-  s.addText(num, { x:0.403, y:0.284, w:2.365, h:2.205, fontSize:125, color:'46CCFE', bold:true, fontFace:'微软雅黑', margin:0, valign:'top' });
-  s.addShape(pres.ShapeType.rect, { x:0.603, y:2.489, w:0.876, h:0.096, fill:{ color:'E8210A' } });
+  s.addText(num, { x:0.403, y:0.284, w:2.365, h:2.205, fontSize:125, color:'00CCFE', bold:true, fontFace:'Microsoft YaHei', margin:0, valign:'top' });
+  s.addShape(pres.ShapeType.rect, { x:0.603, y:2.489, w:0.876, h:0.096, fill:{ color:'00CCFE' } });
   s.addText(title, { x:0.516, y:2.970, w:10.870, h:0.667, fontSize:24, color:'FFFFFF', bold:true, fontFace:'Microsoft YaHei', margin:0, valign:'middle' });
-  if (subtitle) s.addText(subtitle, { x:0.516, y:3.626, w:5.167, h:1.320, fontSize:18, color:'FFFFFF', fontFace:'Microsoft YaHei', margin:0 });
+  if (subtitle) s.addText(subtitle, { x:0.516, y:3.626, w:5.167, h:1.320, fontSize:16, color:'FFFFFF', fontFace:'Microsoft YaHei', margin:0 });
   addFooter(s, pageNum, true);
 }
 ```
@@ -287,7 +290,7 @@ function addDataCardSlide(pres, A, { title, subtitle, cards }, pageNum) {
     s.addShape(pres.ShapeType.rect, { x, y:cY, w:cW, h:cH, fill:{ color:'F7F9FC' }, shadow:mkShS() });
     s.addShape(pres.ShapeType.rect, { x, y:cY, w:cW, h:0.55, fill:{ color:col } });
     s.addText(c.label || '', { x, y:cY, w:cW, h:0.55, fontSize:15, color:'FFFFFF', bold:true, fontFace:'Microsoft YaHei', align:'center', margin:0, valign:'middle' });
-    s.addText((c.num || '') + (c.unit ? (' ' + c.unit) : ''), { x, y:cY+0.70, w:cW, h:1.50, fontSize:60, color:col, bold:true, fontFace:'Helvetica Neue', align:'center', margin:0, valign:'middle' });
+    s.addText((c.num || '') + (c.unit ? (' ' + c.unit) : ''), { x, y:cY+0.70, w:cW, h:1.50, fontSize:60, color:col, bold:true, fontFace:'Microsoft YaHei', align:'center', margin:0, valign:'middle' });
     if (c.sub) s.addText(c.sub, { x:x+0.12, y:cY+2.30, w:cW-0.24, h:2.8, fontSize:14, color:'555555', fontFace:'Microsoft YaHei', valign:'top', margin:0, wrap:true });
   });
   addFooter(s, pageNum, false);
@@ -332,7 +335,7 @@ function addFlowSlide(pres, A, { title, subtitle, steps, note }, pageNum) {
     const x = sX + i*(sW+0.28), c = COLOR_SEQ[i % COLOR_SEQ.length];
     s.addShape(pres.ShapeType.rect, { x, y:sY, w:sW, h:sH, fill:{ color:'F7F9FC' }, shadow:mkShS() });
     s.addShape(pres.ShapeType.rect, { x, y:sY, w:sW, h:0.52, fill:{ color:c } });
-    s.addText(`Step ${i+1}`, { x, y:sY, w:sW, h:0.52, fontSize:14, color:'FFFFFF', bold:true, fontFace:'Helvetica Neue', align:'center', margin:0, valign:'middle' });
+    s.addText(`Step ${i+1}`, { x, y:sY, w:sW, h:0.52, fontSize:14, color:'FFFFFF', bold:true, fontFace:'Microsoft YaHei', align:'center', margin:0, valign:'middle' });
     s.addText(step.text, { x:x+0.1, y:sY+0.62, w:sW-0.2, h:sH-0.72, fontSize:14, color:'333333', fontFace:'Microsoft YaHei', valign:'top', margin:4 });
     if (i < n-1) s.addShape(pres.ShapeType.rect, { x:x+sW+0.04, y:sY+sH/2-0.04, w:0.20, h:0.07, fill:{ color:'CCCCCC' } });
   });
@@ -382,7 +385,7 @@ function addTimelineSlide(pres, A, { title, subtitle, milestones }, pageNum) {
     const x = sX + (span/(n-1||1))*i;
     s.addShape(pres.ShapeType.oval, { x:x-0.13, y:lineY-0.13, w:0.26, h:0.26, fill:{ color:'1770EA' } });
     const isUp = i%2===0;
-    s.addText(m.date, { x:x-0.9, y:isUp?lineY-1.2:lineY+0.2, w:1.8, h:0.3, fontSize:13, color:'1770EA', bold:true, fontFace:'Helvetica Neue', align:'center', margin:0 });
+    s.addText(m.date, { x:x-0.9, y:isUp?lineY-1.2:lineY+0.2, w:1.8, h:0.3, fontSize:13, color:'1770EA', bold:true, fontFace:'Microsoft YaHei', align:'center', margin:0 });
     s.addText(m.event, { x:x-0.9, y:isUp?lineY-0.85:lineY+0.55, w:1.8, h:0.55, fontSize:13, color:'262626', bold:true, fontFace:'Microsoft YaHei', align:'center', margin:0 });
     if (m.detail) s.addText(m.detail, { x:x-0.9, y:isUp?lineY+0.2:lineY-0.85, w:1.8, h:0.5, fontSize:11, color:'666666', fontFace:'Microsoft YaHei', align:'center', margin:0 });
   });
@@ -470,7 +473,7 @@ function addMetricDashboard(pres, A, { title, subtitle, metrics }, pageNum) {
       x: x + 0.10, y: cY + 0.68, w: cW - 0.20, h: 1.60,
       fontSize: 72, bold: true,
       color: isMain ? 'FFFFFF' : col,
-      fontFace: 'Helvetica Neue',
+      fontFace: 'Microsoft YaHei',
       valign: 'middle', margin: 0, fit: 'shrink',
     });
 
@@ -479,7 +482,7 @@ function addMetricDashboard(pres, A, { title, subtitle, metrics }, pageNum) {
       s.addText(m.sub, {
         x: x + 0.20, y: cY + 2.40, w: cW - 0.40, h: 0.40,
         fontSize: 14, bold: true,
-        color: isMain ? '46CCFE' : '1770EA',
+        color: isMain ? '00CCFE' : '1770EA',
         fontFace: 'Microsoft YaHei', margin: 0,
       });
     }
@@ -488,7 +491,7 @@ function addMetricDashboard(pres, A, { title, subtitle, metrics }, pageNum) {
     if (m.trend && m.trend.length >= 2) {
       const chartX = x + 0.20, chartY = cY + 3.00;
       const chartW = cW - 0.40, chartH = 1.80;
-      const lineColor = isMain ? '46CCFE' : col;
+      const lineColor = isMain ? '00CCFE' : col;
       const data = m.trend;
       const stepX = chartW / (data.length - 1);
 
@@ -729,7 +732,7 @@ function addFeatureCardSlide(pres, A, { title, subtitle, features }, pageNum) {
       s.addText(f.icon, {
         x: icoCX - icoR, y: icoCY - icoR,
         w: icoR * 2, h: icoR * 2,
-        fontSize: 22, fontFace: 'Segoe UI Emoji',
+        fontSize: 22, fontFace: 'Microsoft YaHei',
         color: 'FFFFFF', align: 'center', valign: 'middle', margin: 0,
       });
     }
@@ -999,7 +1002,7 @@ function addHeroSlide(pres, A, { title, hero, points, accentColor }, pageNum) {
     s.addText(hero.number, {
       x: 0.40, y: 1.80, w: splitX - 0.60, h: 2.40,
       fontSize: 120, bold: true, color: 'FFFFFF',
-      fontFace: 'Helvetica Neue',
+      fontFace: 'Microsoft YaHei',
       valign: 'middle', align: 'left', margin: 0, fit: 'shrink',
     });
   }
@@ -1054,6 +1057,605 @@ function addHeroSlide(pres, A, { title, hero, points, accentColor }, pageNum) {
 
 ---
 
+## 版式 19 — 金字塔 / MECE 版式
+
+**Vibe**：专业严谨 ｜**场景**：核心主张 + 三大支柱 + 论据，汇报/战略解读
+
+```javascript
+// ══════════════════════════════════════════════════════════════════════
+// 版式 19 — 金字塔 / MECE 版式
+// ══════════════════════════════════════════════════════════════════════
+/**
+ * addPyramidSlide — 金字塔 / MECE 三层结构
+ *
+ * @param {Object} data
+ *   title      {string}   页面标题
+ *   subtitle   {string}   副标题（可选）
+ *   conclusion {string}   顶层核心结论（一句话）
+ *   pillars    {Array}    三大分论点，每项 { label, points: string[] }
+ */
+function addPyramidSlide(pres, A, data, pageNum) {
+  const { title, subtitle, conclusion, pillars = [] } = data;
+  const s = pres.addSlide();
+  s.background = { color: 'FFFFFF' };
+  addLogo(s, A, false);
+  addContentTitle(s, title, subtitle);
+  addFooter(s, pageNum, false);
+
+  const GX = 0.434, GY = 1.48, GW = 12.256, GAP = 0.12;
+
+  // ── 顶层：结论条（主蓝全宽）
+  const topH = 0.72;
+  s.addShape(pres.ShapeType.rect, {
+    x: GX, y: GY, w: GW, h: topH,
+    fill: { color: '1770EA' }, line: { type: 'none' }, shadow: mkSh(),
+  });
+  s.addText(conclusion || '核心结论', {
+    x: GX + 0.28, y: GY, w: GW - 0.56, h: topH,
+    fontSize: 20, bold: true, color: 'FFFFFF',
+    fontFace: 'Microsoft YaHei', valign: 'middle',
+  });
+
+  // ── 中层：三大分论点（金黄色等宽三列）
+  const midY = GY + topH + GAP;
+  const midH = 0.60;
+  const colW = (GW - GAP * 2) / 3;
+
+  const p3 = pillars.length >= 3 ? pillars.slice(0, 3)
+    : [...pillars, ...Array(3 - pillars.length).fill({ label: '分论点', points: [] })];
+
+  p3.forEach((pillar, i) => {
+    const cx = GX + i * (colW + GAP);
+    s.addShape(pres.ShapeType.rect, {
+      x: cx, y: midY, w: colW, h: midH,
+      fill: { color: 'FFB800' }, line: { type: 'none' }, shadow: mkShS(),
+    });
+    s.addText(pillar.label || `分论点 ${i + 1}`, {
+      x: cx + 0.15, y: midY, w: colW - 0.30, h: midH,
+      fontSize: 16, bold: true, color: '1A1A3E',
+      fontFace: 'Microsoft YaHei', valign: 'middle', align: 'center',
+    });
+  });
+
+  // ── 底层：三列论据区（浅灰蓝底）
+  const botY = midY + midH + GAP;
+  const botH = 7.5 - 0.20 - botY;
+
+  p3.forEach((pillar, i) => {
+    const cx = GX + i * (colW + GAP);
+    s.addShape(pres.ShapeType.rect, {
+      x: cx, y: botY, w: colW, h: botH,
+      fill: { color: 'EEF2FF' }, line: { color: 'D8E4F8', pt: 0.8 }, shadow: mkShS(),
+    });
+    const pts = (pillar.points || []).slice(0, 4);
+    if (pts.length) {
+      const items = pts.map((pt, j) => ({
+        text: pt,
+        options: {
+          breakLine: j < pts.length - 1,
+          fontSize: 13, color: '333355',
+          fontFace: 'Microsoft YaHei', paraSpaceAfter: 14,
+          bullet: { type: 'char', code: '25CF', color: '1770EA', size: 60 },
+        },
+      }));
+      s.addText(items, {
+        x: cx + 0.18, y: botY + 0.18, w: colW - 0.36, h: botH - 0.30,
+        valign: 'top', fontFace: 'Microsoft YaHei',
+      });
+    }
+  });
+}
+```
+
+---
+
+## 版式 20 — PDCA 循环版式
+
+**Vibe**：专业严谨 ｜**场景**：复盘述职、质量管理、持续改进
+
+```javascript
+// ══════════════════════════════════════════════════════════════════════
+// 版式 20 — PDCA 循环版式
+// ══════════════════════════════════════════════════════════════════════
+/**
+ * addPDCASlide
+ *
+ * @param {Object} data
+ *   title    {string}
+ *   subtitle {string}
+ *   pdca     { P, D, C, A }  各象限 { points: string[] }
+ *
+ * 色彩：P=主蓝 · D=品青 · A=紫色 · C=黄色
+ * 布局：P左上 · D右上 · A左下 · C右下，中央 ↻ 循环标识
+ */
+function addPDCASlide(pres, A, data, pageNum) {
+  const { title, subtitle, pdca = {} } = data;
+  const s = pres.addSlide();
+  s.background = { color: 'FFFFFF' };
+  addLogo(s, A, false);
+  addContentTitle(s, title, subtitle);
+  addFooter(s, pageNum, false);
+
+  const GX = 0.434, GY = 1.48, GW = 12.256, GH = 5.72;
+  const GAP = 0.14;
+  const cW = (GW - GAP) / 2;
+  const cH = (GH - GAP) / 2;
+
+  const CELLS = [
+    { key: 'P', label: 'P  计划 Plan',  color: '1770EA', fg: 'FFFFFF', data: pdca.P },
+    { key: 'D', label: 'D  执行 Do',    color: '00CBFF', fg: 'FFFFFF', data: pdca.D },
+    { key: 'A', label: 'A  改进 Act',   color: '8B6FE8', fg: 'FFFFFF', data: pdca.A },
+    { key: 'C', label: 'C  检查 Check', color: 'FFB800', fg: '1A1A3E', data: pdca.C },
+  ];
+  const COORDS = [[0,0],[1,0],[0,1],[1,1]]; // P左上·D右上·A左下·C右下
+
+  CELLS.forEach((cell, i) => {
+    const [col, row] = COORDS[i];
+    const cx = GX + col * (cW + GAP);
+    const cy = GY + row * (cH + GAP);
+
+    s.addShape(pres.ShapeType.rect, {
+      x: cx, y: cy, w: cW, h: cH,
+      fill: { color: cell.color }, line: { type: 'none' }, shadow: mkSh(),
+    });
+    // 大号字母水印
+    s.addText(cell.key, {
+      x: cx + 0.20, y: cy + 0.12, w: 0.70, h: 0.85,
+      fontSize: 56, bold: true, color: 'FFFFFF',
+      fontFace: 'Microsoft YaHei', valign: 'middle',
+      transparency: cell.fg === '1A1A3E' ? 30 : 20,
+    });
+    // 标题
+    s.addText(cell.label, {
+      x: cx + 0.95, y: cy + 0.22, w: cW - 1.10, h: 0.46,
+      fontSize: 15, bold: true,
+      color: cell.fg === '1A1A3E' ? '1A1A3E' : 'FFFFFF',
+      fontFace: 'Microsoft YaHei', valign: 'middle',
+    });
+    // 要点
+    const pts = ((cell.data && cell.data.points) || []).slice(0, 4);
+    if (pts.length) {
+      const items = pts.map((pt, j) => ({
+        text: pt,
+        options: {
+          breakLine: j < pts.length - 1,
+          fontSize: 13,
+          color: cell.fg === '1A1A3E' ? '2A2A2A' : 'DDEEFF',
+          fontFace: 'Microsoft YaHei', paraSpaceAfter: 12,
+          bullet: { type: 'char', code: '25B8',
+            color: cell.fg === '1A1A3E' ? '1A1A3E' : 'FFFFFF', size: 70 },
+        },
+      }));
+      s.addText(items, {
+        x: cx + 0.22, y: cy + 0.80, w: cW - 0.40, h: cH - 0.98,
+        valign: 'top', fontFace: 'Microsoft YaHei',
+      });
+    }
+  });
+
+  // 中央循环标识
+  const ox = GX + cW + GAP / 2 - 0.32;
+  const oy = GY + cH + GAP / 2 - 0.32;
+  s.addShape(pres.ShapeType.ellipse, {
+    x: ox, y: oy, w: 0.64, h: 0.64,
+    fill: { color: 'FFFFFF' }, line: { color: 'C0D0F0', pt: 2 }, shadow: mkSh(),
+  });
+  s.addText('↻', {
+    x: ox, y: oy, w: 0.64, h: 0.64,
+    fontSize: 22, color: '1770EA', align: 'center', valign: 'middle',
+    fontFace: 'Microsoft YaHei',
+  });
+}
+```
+
+---
+
+## 版式 21 — SWOT 矩阵版式
+
+**Vibe**：专业严谨 ｜**场景**：生态策略、竞争分析、战略规划
+
+```javascript
+// ══════════════════════════════════════════════════════════════════════
+// 版式 21 — SWOT 矩阵版式
+// ══════════════════════════════════════════════════════════════════════
+/**
+ * addSWOTSlide
+ *
+ * @param {Object} data
+ *   title    {string}
+ *   subtitle {string}
+ *   swot     { S, W, O, T }  各象限 { points: string[] }
+ *
+ * 色彩：S=主蓝 · O=青绿 · W=浅灰蓝(深字) · T=紫色
+ * 布局：S左上 · O右上 · W左下 · T右下，含轴线标注
+ */
+function addSWOTSlide(pres, A, data, pageNum) {
+  const { title, subtitle, swot = {} } = data;
+  const s = pres.addSlide();
+  s.background = { color: 'FFFFFF' };
+  addLogo(s, A, false);
+  addContentTitle(s, title, subtitle);
+  addFooter(s, pageNum, false);
+
+  const GX = 0.434, GY = 1.48, GW = 12.256, GH = 5.72;
+  const GAP = 0.12;
+  const cW = (GW - GAP) / 2;
+  const cH = (GH - GAP) / 2;
+
+  const CELLS = [
+    { key: 'S', label: 'S  优势 Strengths',    headerColor: '1770EA', headerFg: 'FFFFFF', bodyColor: 'EEF4FF', data: swot.S },
+    { key: 'O', label: 'O  机会 Opportunities', headerColor: '00C4A7', headerFg: 'FFFFFF', bodyColor: 'EDFAF7', data: swot.O },
+    { key: 'W', label: 'W  劣势 Weaknesses',    headerColor: 'EEF2FF', headerFg: '333355', bodyColor: 'F8F8FF', data: swot.W },
+    { key: 'T', label: 'T  威胁 Threats',       headerColor: '8B6FE8', headerFg: 'FFFFFF', bodyColor: 'F3F0FF', data: swot.T },
+  ];
+  const COORDS = [[0,0],[1,0],[0,1],[1,1]];
+
+  CELLS.forEach((cell, i) => {
+    const [col, row] = COORDS[i];
+    const cx = GX + col * (cW + GAP);
+    const cy = GY + row * (cH + GAP);
+    const hH = 0.50;
+
+    s.addShape(pres.ShapeType.rect, {
+      x: cx, y: cy, w: cW, h: hH,
+      fill: { color: cell.headerColor }, line: { type: 'none' },
+    });
+    s.addText(cell.label, {
+      x: cx + 0.20, y: cy, w: cW - 0.30, h: hH,
+      fontSize: 15, bold: true, color: cell.headerFg,
+      fontFace: 'Microsoft YaHei', valign: 'middle',
+    });
+    s.addShape(pres.ShapeType.rect, {
+      x: cx, y: cy + hH, w: cW, h: cH - hH,
+      fill: { color: cell.bodyColor }, line: { color: 'DCE8F5', pt: 0.8 }, shadow: mkShS(),
+    });
+
+    const pts = ((cell.data && cell.data.points) || []).slice(0, 4);
+    if (pts.length) {
+      const dotColor = cell.headerColor === 'EEF2FF' ? '1770EA' : cell.headerColor;
+      const items = pts.map((pt, j) => ({
+        text: pt,
+        options: {
+          breakLine: j < pts.length - 1,
+          fontSize: 13, color: '333355',
+          fontFace: 'Microsoft YaHei', paraSpaceAfter: 14,
+          bullet: { type: 'char', code: '25CF', color: dotColor, size: 55 },
+        },
+      }));
+      s.addText(items, {
+        x: cx + 0.22, y: cy + hH + 0.16, w: cW - 0.38, h: cH - hH - 0.24,
+        valign: 'top', fontFace: 'Microsoft YaHei',
+      });
+    }
+  });
+
+  // 轴线标注
+  const axisY = GY - 0.32;
+  [{ t:'内部因素', x: GX + cW/2 - 0.8 }, { t:'外部因素', x: GX + cW + GAP + cW/2 - 0.8 }].forEach(ax => {
+    s.addText(ax.t, { x: ax.x, y: axisY, w: 1.60, h: 0.28,
+      fontSize: 11, color: '888888', fontFace: 'Microsoft YaHei', align: 'center' });
+  });
+  [{ t:'正面', y: GY + cH/2 - 0.12 }, { t:'负面', y: GY + cH + GAP + cH/2 - 0.12 }].forEach(ax => {
+    s.addText(ax.t, { x: GX - 0.36, y: ax.y, w: 0.28, h: 0.28,
+      fontSize: 11, color: '888888', fontFace: 'Microsoft YaHei', align: 'center', valign: 'middle' });
+  });
+}
+```
+
+---
+
+## 版式 22 — 黄金圈版式（WHY / HOW / WHAT）
+
+**Vibe**：极简震撼 ｜**场景**：产品发布、Partner 大会演讲、品牌故事
+
+```javascript
+// ══════════════════════════════════════════════════════════════════════
+// 版式 22 — 黄金圈版式
+// ══════════════════════════════════════════════════════════════════════
+/**
+ * addGoldenCircleSlide
+ *
+ * @param {Object} data
+ *   title    {string}
+ *   subtitle {string}
+ *   why      { body }   核心使命（最重要）
+ *   how      { body }   方法路径
+ *   what     { body }   产品服务
+ *
+ * 左侧：WHY(主蓝内核) → HOW(品青中层) → WHAT(浅灰外层) 嵌套椭圆
+ * 右侧：三行说明卡，左侧彩色竖条区分层次
+ */
+function addGoldenCircleSlide(pres, A, data, pageNum) {
+  const { title, subtitle, why = {}, how = {}, what = {} } = data;
+  const s = pres.addSlide();
+  s.background = { color: 'FFFFFF' };
+  addLogo(s, A, false);
+  addContentTitle(s, title, subtitle);
+  addFooter(s, pageNum, false);
+
+  const cx = 3.50, cy = 4.42;
+
+  // WHAT 外环
+  s.addShape(pres.ShapeType.ellipse, {
+    x: cx - 2.80, y: cy - 2.30, w: 5.60, h: 4.60,
+    fill: { color: 'EEF2FF' }, line: { color: 'C8D8F8', pt: 1.5 }, shadow: mkSh(),
+  });
+  // HOW 中环
+  s.addShape(pres.ShapeType.ellipse, {
+    x: cx - 1.80, y: cy - 1.48, w: 3.60, h: 2.96,
+    fill: { color: '00CBFF' }, line: { type: 'none' }, shadow: mkShS(),
+  });
+  // WHY 内核
+  s.addShape(pres.ShapeType.ellipse, {
+    x: cx - 0.90, y: cy - 0.74, w: 1.80, h: 1.48,
+    fill: { color: '1770EA' }, line: { type: 'none' }, shadow: mkShS(),
+  });
+
+  s.addText('WHY',  { x: cx-0.72, y: cy-0.28, w: 1.44, h: 0.56,
+    fontSize: 15, bold: true, color: 'FFFFFF', fontFace: 'Microsoft YaHei', align: 'center', valign: 'middle' });
+  s.addText('HOW',  { x: cx-1.70, y: cy-0.22, w: 0.82, h: 0.44,
+    fontSize: 12, bold: true, color: 'FFFFFF', fontFace: 'Microsoft YaHei', align: 'center', valign: 'middle' });
+  s.addText('WHAT', { x: cx+0.88, y: cy-0.22, w: 0.90, h: 0.44,
+    fontSize: 12, bold: true, color: '5577BB', fontFace: 'Microsoft YaHei', align: 'center', valign: 'middle' });
+
+  // 右侧说明卡
+  const RX = 7.00, RW = 5.60, rowH = 1.60, rowGap = 0.14, startY = 1.65;
+  const rows = [
+    { label: 'WHY — 为什么', color: '1770EA', body: why.body },
+    { label: 'HOW — 怎么做', color: '00CBFF', body: how.body },
+    { label: 'WHAT — 做什么', color: 'C0CCDD', textColor: '555566', body: what.body },
+  ];
+  rows.forEach((row, i) => {
+    const ry = startY + i * (rowH + rowGap);
+    s.addShape(pres.ShapeType.rect, { x: RX, y: ry, w: 0.10, h: rowH,
+      fill: { color: row.color }, line: { type: 'none' } });
+    s.addShape(pres.ShapeType.rect, { x: RX+0.10, y: ry, w: RW-0.10, h: rowH,
+      fill: { color: 'F8FAFF' }, line: { color: 'DCE8F5', pt: 0.8 }, shadow: mkShS() });
+    s.addText(row.label, { x: RX+0.28, y: ry+0.12, w: RW-0.44, h: 0.38,
+      fontSize: 14, bold: true, color: row.textColor || row.color,
+      fontFace: 'Microsoft YaHei', valign: 'middle' });
+    if (row.body) {
+      s.addText(row.body, { x: RX+0.28, y: ry+0.54, w: RW-0.44, h: rowH-0.66,
+        fontSize: 13, color: '444455',
+        fontFace: 'Microsoft YaHei', valign: 'top', lineSpacingMultiple: 1.35 });
+    }
+  });
+}
+```
+
+---
+
+## 版式 23 — 5W1H 六格版式
+
+**Vibe**：专业严谨 ｜**场景**：方案说明、项目计划、活动策划（2×3 等宽格）
+
+```javascript
+// ══════════════════════════════════════════════════════════════════════
+// 版式 23 — 5W1H 六格版式
+// ══════════════════════════════════════════════════════════════════════
+/**
+ * addFiveW1HSlide
+ *
+ * @param {Object} data
+ *   title    {string}
+ *   subtitle {string}
+ *   items    Array<{ key:'WHO'|'WHAT'|'WHEN'|'WHERE'|'WHY'|'HOW', label?, points:string[] }>
+ *            顺序固定：WHO·WHAT·WHEN（上行）WHERE·WHY·HOW（下行）
+ */
+function addFiveW1HSlide(pres, A, data, pageNum) {
+  const { title, subtitle, items = [] } = data;
+  const s = pres.addSlide();
+  s.background = { color: 'FFFFFF' };
+  addLogo(s, A, false);
+  addContentTitle(s, title, subtitle);
+  addFooter(s, pageNum, false);
+
+  const GX = 0.434, GY = 1.48, GW = 12.256, GH = 5.72;
+  const COLS = 3, ROWS = 2, GAP = 0.12;
+  const cW = (GW - GAP * (COLS-1)) / COLS;
+  const cH = (GH - GAP * (ROWS-1)) / ROWS;
+  const hH = 0.52;
+
+  const DEFAULTS = [
+    { key:'WHO',   label:'谁'   },
+    { key:'WHAT',  label:'什么' },
+    { key:'WHEN',  label:'何时' },
+    { key:'WHERE', label:'何地' },
+    { key:'WHY',   label:'为何' },
+    { key:'HOW',   label:'如何' },
+  ];
+
+  DEFAULTS.forEach((def, i) => {
+    const col = i % COLS, row = Math.floor(i / COLS);
+    const cx = GX + col * (cW + GAP);
+    const cy = GY + row * (cH + GAP);
+    const src = items.find(it => it.key === def.key) || {};
+
+    s.addShape(pres.ShapeType.rect, { x: cx, y: cy, w: cW, h: cH,
+      fill: { color: 'F5F8FF' }, line: { color: 'D8E4F8', pt: 0.8 }, shadow: mkShS() });
+    s.addShape(pres.ShapeType.rect, { x: cx, y: cy, w: cW, h: hH,
+      fill: { color: '1770EA' }, line: { type: 'none' } });
+    s.addText(`${def.key}  ${src.label || def.label}`, {
+      x: cx+0.15, y: cy, w: cW-0.30, h: hH,
+      fontSize: 14, bold: true, color: 'FFFFFF',
+      fontFace: 'Microsoft YaHei', valign: 'middle' });
+
+    const pts = (src.points || []).slice(0, 3);
+    if (pts.length) {
+      const txtItems = pts.map((pt, j) => ({
+        text: pt,
+        options: {
+          breakLine: j < pts.length - 1,
+          fontSize: 13, color: '333355',
+          fontFace: 'Microsoft YaHei', paraSpaceAfter: 14,
+          bullet: { type: 'char', code: '25CF', color: '1770EA', size: 55 },
+        },
+      }));
+      s.addText(txtItems, { x: cx+0.18, y: cy+hH+0.14, w: cW-0.34, h: cH-hH-0.22,
+        valign: 'top', fontFace: 'Microsoft YaHei' });
+    }
+  });
+}
+```
+
+---
+
+## 版式 24 — SCQA 四步流程版式
+
+**Vibe**：专业严谨 ｜**场景**：提案、客户大会、问题分析报告，横向四步叙事
+
+```javascript
+// ══════════════════════════════════════════════════════════════════════
+// 版式 24 — SCQA 四步流程版式
+// ══════════════════════════════════════════════════════════════════════
+/**
+ * addSCQASlide
+ *
+ * @param {Object} data
+ *   title    {string}
+ *   subtitle {string}
+ *   scqa     { S, C, Q, A }  各步 { headline, body }
+ *
+ * 色彩：S=浅灰蓝(深字) · C=金黄 · Q=紫色 · A=主蓝
+ * 每列顶部 Header + 正文区，右下角大号字母水印
+ */
+function addSCQASlide(pres, A, data, pageNum) {
+  const { title, subtitle, scqa = {} } = data;
+  const s = pres.addSlide();
+  s.background = { color: 'FFFFFF' };
+  addLogo(s, A, false);
+  addContentTitle(s, title, subtitle);
+  addFooter(s, pageNum, false);
+
+  const GX = 0.434, GY = 1.48, GW = 12.256, GH = 5.72;
+  const GAP = 0.14;
+  const cW = (GW - GAP * 3) / 4;
+  const hH = 0.60;
+
+  const STEPS = [
+    { key:'S', label:'情境 Situation',   color:'EEF2FF', headerFg:'333355', data: scqa.S },
+    { key:'C', label:'冲突 Complication', color:'FFB800', headerFg:'1A1A3E', data: scqa.C },
+    { key:'Q', label:'疑问 Question',     color:'8B6FE8', headerFg:'FFFFFF', data: scqa.Q },
+    { key:'A', label:'解答 Answer',       color:'1770EA', headerFg:'FFFFFF', data: scqa.A },
+  ];
+
+  STEPS.forEach((step, i) => {
+    const cx = GX + i * (cW + GAP);
+
+    s.addShape(pres.ShapeType.rect, { x: cx, y: GY, w: cW, h: hH,
+      fill: { color: step.color }, line: { type: 'none' }, shadow: mkShS() });
+    s.addText(step.label, { x: cx+0.14, y: GY, w: cW-0.28, h: hH,
+      fontSize: 13, bold: true, color: step.headerFg,
+      fontFace: 'Microsoft YaHei', valign: 'middle' });
+
+    // 箭头连接（最后一列不加）
+    if (i < 3) {
+      s.addShape(pres.ShapeType.rect, {
+        x: cx+cW+0.01, y: GY+hH/2-0.02, w: GAP-0.02, h: 0.04,
+        fill: { color: 'C0D0F0' }, line: { type: 'none' } });
+    }
+
+    s.addShape(pres.ShapeType.rect, { x: cx, y: GY+hH, w: cW, h: GH-hH,
+      fill: { color: 'F8FAFF' }, line: { color: 'D8E8F5', pt: 0.8 }, shadow: mkShS() });
+
+    // 大号字母水印
+    s.addText(step.key, { x: cx+cW-1.00, y: GY+hH+0.05, w: 0.90, h: 1.10,
+      fontSize: 64, bold: true, color: step.color,
+      fontFace: 'Microsoft YaHei', align: 'right', valign: 'top', transparency: 75 });
+
+    const d = step.data || {};
+    if (d.headline) {
+      s.addText(d.headline, { x: cx+0.18, y: GY+hH+0.18, w: cW-0.34, h: 0.50,
+        fontSize: 14, bold: true, color: '1A2A4A',
+        fontFace: 'Microsoft YaHei', valign: 'middle' });
+    }
+    if (d.body) {
+      s.addText(d.body, { x: cx+0.18, y: GY+hH+0.74, w: cW-0.34, h: GH-hH-0.90,
+        fontSize: 12.5, color: '444455',
+        fontFace: 'Microsoft YaHei', valign: 'top', lineSpacingMultiple: 1.40 });
+    }
+  });
+}
+```
+
+---
+
+## 版式 25 — IPD 五看版式
+
+**Vibe**：专业严谨 ｜**场景**：战略发布、生态大会、市场全景分析，5 列等宽
+
+```javascript
+// ══════════════════════════════════════════════════════════════════════
+// 版式 25 — IPD 五看版式
+// ══════════════════════════════════════════════════════════════════════
+/**
+ * addIPDFiveViewSlide
+ *
+ * @param {Object} data
+ *   title    {string}
+ *   subtitle {string}
+ *   views    Array<{ num?, label?, headline, body }>
+ *            顺序：看行业·看客户·看机会·看竞争·看自己
+ *
+ * 色彩：01主蓝·02品青·03青绿·04紫色·05主蓝（循环）
+ * 顶部序号色块 + 核心观点（粗体彩色）+ 分割线 + 支撑数据
+ */
+function addIPDFiveViewSlide(pres, A, data, pageNum) {
+  const { title, subtitle, views = [] } = data;
+  const s = pres.addSlide();
+  s.background = { color: 'FFFFFF' };
+  addLogo(s, A, false);
+  addContentTitle(s, title, subtitle);
+  addFooter(s, pageNum, false);
+
+  const GX = 0.434, GY = 1.48, GW = 12.256, GH = 5.72;
+  const N = 5, GAP = 0.12;
+  const cW = (GW - GAP * (N-1)) / N;
+  const hH = 0.80;
+
+  const DEFAULTS = [
+    { num:'01', label:'看行业', color:'1770EA' },
+    { num:'02', label:'看客户', color:'00CBFF' },
+    { num:'03', label:'看机会', color:'00C4A7' },
+    { num:'04', label:'看竞争', color:'8B6FE8' },
+    { num:'05', label:'看自己', color:'1770EA' },
+  ];
+
+  DEFAULTS.forEach((def, i) => {
+    const cx = GX + i * (cW + GAP);
+    const src = views[i] || {};
+
+    s.addShape(pres.ShapeType.rect, { x: cx, y: GY, w: cW, h: hH,
+      fill: { color: def.color }, line: { type: 'none' }, shadow: mkShS() });
+    s.addText(src.num || def.num, { x: cx+0.12, y: GY+0.02, w: cW-0.24, h: 0.40,
+      fontSize: 22, bold: true, color: 'FFFFFF',
+      fontFace: 'Microsoft YaHei', valign: 'middle' });
+    s.addText(src.label || def.label, { x: cx+0.12, y: GY+0.42, w: cW-0.24, h: 0.34,
+      fontSize: 13, bold: true, color: 'FFFFFF',
+      fontFace: 'Microsoft YaHei', valign: 'middle' });
+
+    s.addShape(pres.ShapeType.rect, { x: cx, y: GY+hH, w: cW, h: GH-hH,
+      fill: { color: 'EEF4FF' }, line: { color: 'D0DEFF', pt: 0.8 }, shadow: mkShS() });
+
+    if (src.headline) {
+      s.addText(src.headline, { x: cx+0.14, y: GY+hH+0.14, w: cW-0.28, h: 0.54,
+        fontSize: 13, bold: true, color: def.color,
+        fontFace: 'Microsoft YaHei', valign: 'middle', lineSpacingMultiple: 1.25 });
+    }
+    s.addShape(pres.ShapeType.line, {
+      x: cx+0.14, y: GY+hH+0.76, w: cW-0.28, h: 0,
+      line: { color: 'C8D8F0', pt: 0.8 } });
+    if (src.body) {
+      s.addText(src.body, { x: cx+0.14, y: GY+hH+0.86, w: cW-0.28, h: GH-hH-1.02,
+        fontSize: 12, color: '444466',
+        fontFace: 'Microsoft YaHei', valign: 'top', lineSpacingMultiple: 1.40 });
+    }
+  });
+}
+```
+
+---
+
 ## 版式选择速查（完整版）
 
 | 场景描述 | 推荐版式 | Vibe |
@@ -1069,350 +1671,10 @@ function addHeroSlide(pres, A, { title, hero, points, accentColor }, pageNum) {
 | **功能列举 / 亮点介绍** | **14 核心特性卡片** | 活力生态 |
 | **成熟度 / 对照分析** | **15 分层矩阵** | 专业严谨 |
 | **战略金句 / CEO宣言** | **16 金句引言页** | 极简震撼 |
-| **年度封底 / 战略口号** | **18 超大焦点页** | 极简震撼 |
----
-
-## ═══ 思维模型版式（v3.0）══════════════════════════════════════
-
-> 以下 7 种版式用于 SKILL.md Phase 0 识别到的思维模型内容页。
-> 每种版式含：结构说明、ASCII 布局图、品牌色约束、完整 PptxGenJS 代码。
-
----
-
-## 版式 19 — 金字塔 / MECE 版式
-
-**结构**：顶部结论 → 中层分论点 → 底层论据（三级分层）
-
-```
-┌────────────────────────────────────────────┐  ← 主蓝 #1770EA，白字，结论一句话
-│                  核心结论                    │
-└────────────────────────────────────────────┘
-┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ← 黄色 #FFB800，白字
-│   分论点 1   │  │   分论点 2   │  │   分论点 3   │
-└──────────────┘  └──────────────┘  └──────────────┘
-  · 论据 1           · 论据 1           · 论据 1      ← 浅灰蓝底 #EEF2FF，深色小字
-  · 论据 2           · 论据 2           · 论据 2
-```
-
-**品牌色**：结论=`#1770EA` / 分论点=`#FFB800` / 论据区=`#EEF2FF`（深色字）
-
-```javascript
-function addPyramidSlide(ppt, A, pageNum, title, conclusion, points) {
-  // points: [{label, bullets:[]}, ...]  (3 items)
-  const slide = ppt.addSlide();
-  slide.addImage({ data: A.BG_TOC, x:0,y:0,w:13.3333,h:7.5 });
-  addLogo(slide, A, false);
-  addFooter(slide, pageNum, false);
-  // 页面标题
-  slide.addText(title, { x:0.5,y:0.3,w:12.0,h:0.45, fontSize:22, bold:true,
-    color:'1770EA', fontFace:'Microsoft YaHei' });
-  // 结论条（全宽）
-  slide.addShape(ppt.ShapeType.rect, { x:0.5,y:0.95,w:12.3333,h:0.85,
-    fill:{color:'1770EA'}, line:{color:'1770EA'} });
-  slide.addText(conclusion, { x:0.5,y:0.95,w:12.3333,h:0.85,
-    fontSize:18, bold:true, color:'FFFFFF', align:'center',
-    fontFace:'Microsoft YaHei', valign:'middle' });
-  // 三列分论点 + 论据
-  const colW = 3.95, colX = [0.5, 4.7, 8.9], colY = 2.0;
-  points.forEach((pt, i) => {
-    // 分论点标题块
-    slide.addShape(ppt.ShapeType.rect, { x:colX[i],y:colY,w:colW,h:0.65,
-      fill:{color:'FFB800'}, line:{color:'FFB800'} });
-    slide.addText(pt.label, { x:colX[i],y:colY,w:colW,h:0.65,
-      fontSize:15, bold:true, color:'FFFFFF', align:'center',
-      fontFace:'Microsoft YaHei', valign:'middle' });
-    // 论据区
-    slide.addShape(ppt.ShapeType.rect, { x:colX[i],y:colY+0.68,w:colW,h:3.6,
-      fill:{color:'EEF2FF'}, line:{color:'C8D4F8'} });
-    const bulletText = pt.bullets.map(b => ({ text:'· '+b,
-      options:{ fontSize:12, color:'333333', fontFace:'Microsoft YaHei',
-        paraSpaceAfter:6, bullet:false } }));
-    slide.addText(bulletText, { x:colX[i]+0.15,y:colY+0.75,w:colW-0.3,h:3.4,
-      valign:'top' });
-  });
-}
-```
-
----
-
-## 版式 20 — PDCA 循环版式
-
-**结构**：4格顺时针排布，中央循环符号
-
-```
-  ┌─────────────┐     ┌─────────────┐
-  │  P  计划    │ →   │  D  执行    │
-  └─────────────┘     └─────────────┘
-        ↑        ↻          ↓
-  ┌─────────────┐     ┌─────────────┐
-  │  A  改进    │ ←   │  C  检查    │
-  └─────────────┘     └─────────────┘
-```
-
-**品牌色**：P=`#1770EA` / D=`#00CBFF` / C=`#FFB800` / A=`#8B6FE8`
-
-```javascript
-function addPDCASlide(ppt, A, pageNum, title, pdca) {
-  // pdca: { P:{label,bullets}, D:{...}, C:{...}, A:{...} }
-  const slide = ppt.addSlide();
-  slide.addImage({ data: A.BG_TOC, x:0,y:0,w:13.3333,h:7.5 });
-  addLogo(slide, A, false); addFooter(slide, pageNum, false);
-  slide.addText(title, { x:0.5,y:0.25,w:12,h:0.45, fontSize:22, bold:true,
-    color:'1770EA', fontFace:'Microsoft YaHei' });
-  const cells = [
-    { key:'P', color:'1770EA', x:1.2,  y:1.1 },
-    { key:'D', color:'00CBFF', x:7.2,  y:1.1 },
-    { key:'C', color:'FFB800', x:7.2,  y:4.0 },
-    { key:'A', color:'8B6FE8', x:1.2,  y:4.0 },
-  ];
-  const cW=4.8, cH=2.6;
-  cells.forEach(cell => {
-    const d = pdca[cell.key];
-    slide.addShape(ppt.ShapeType.roundRect, { x:cell.x,y:cell.y,w:cW,h:cH,
-      fill:{color:cell.color}, line:{color:cell.color}, rectRadius:0.08 });
-    slide.addText(cell.key + '  ' + d.label, { x:cell.x+0.2,y:cell.y+0.15,
-      w:cW-0.4,h:0.5, fontSize:16, bold:true, color:'FFFFFF',
-      fontFace:'Microsoft YaHei' });
-    const bullets = d.bullets.map(b=>({ text:'• '+b,
-      options:{ fontSize:12, color:'FFFFFF', fontFace:'Microsoft YaHei',
-        paraSpaceAfter:4, bullet:false }}));
-    slide.addText(bullets, { x:cell.x+0.2,y:cell.y+0.7,w:cW-0.4,h:cH-0.9,
-      valign:'top' });
-  });
-  // 中央循环符号
-  slide.addText('↻', { x:5.8,y:2.3,w:1.5,h:1.5, fontSize:48,
-    color:'AAAAAA', align:'center', valign:'middle', fontFace:'Arial' });
-}
-```
-
----
-
-## 版式 21 — SWOT 矩阵版式
-
-**结构**：2×2 矩阵，横纵轴标注维度
-
-```
-           内部因素              外部因素
-优势/机会  [ S 优势  #1770EA ]  [ O 机会  #00C4A7 ]
-劣势/威胁  [ W 劣势  #EEF2FF ]  [ T 威胁  #8B6FE8 ]
-```
-
-**品牌色**：S=`#1770EA` / O=`#00C4A7` / W=`#EEF2FF`（深字）/ T=`#8B6FE8`
-
-```javascript
-function addSWOTSlide(ppt, A, pageNum, title, swot) {
-  // swot: { S:{label,bullets}, W:{...}, O:{...}, T:{...} }
-  const slide = ppt.addSlide();
-  slide.addImage({ data: A.BG_TOC, x:0,y:0,w:13.3333,h:7.5 });
-  addLogo(slide, A, false); addFooter(slide, pageNum, false);
-  slide.addText(title, { x:0.5,y:0.25,w:12,h:0.45, fontSize:22, bold:true,
-    color:'1770EA', fontFace:'Microsoft YaHei' });
-  // 轴标签
-  slide.addText('内部因素', { x:1.5,y:0.9,w:5,h:0.3, fontSize:11,
-    color:'AAAAAA', align:'center', fontFace:'Microsoft YaHei' });
-  slide.addText('外部因素', { x:7.0,y:0.9,w:5,h:0.3, fontSize:11,
-    color:'AAAAAA', align:'center', fontFace:'Microsoft YaHei' });
-  slide.addText('优势\n机会', { x:0.2,y:1.3,w:1.0,h:2.7, fontSize:11,
-    color:'AAAAAA', align:'center', valign:'middle', fontFace:'Microsoft YaHei' });
-  slide.addText('劣势\n威胁', { x:0.2,y:4.2,w:1.0,h:2.7, fontSize:11,
-    color:'AAAAAA', align:'center', valign:'middle', fontFace:'Microsoft YaHei' });
-  const cells = [
-    { key:'S', color:'1770EA', txtColor:'FFFFFF', x:1.4, y:1.2 },
-    { key:'O', color:'00C4A7', txtColor:'FFFFFF', x:7.1, y:1.2 },
-    { key:'W', color:'EEF2FF', txtColor:'333333', x:1.4, y:4.1 },
-    { key:'T', color:'8B6FE8', txtColor:'FFFFFF', x:7.1, y:4.1 },
-  ];
-  const cW=5.4, cH=2.7;
-  cells.forEach(cell => {
-    const d = swot[cell.key];
-    slide.addShape(ppt.ShapeType.rect, { x:cell.x,y:cell.y,w:cW,h:cH,
-      fill:{color:cell.color}, line:{color:cell.color==='EEF2FF'?'C8D4F8':cell.color} });
-    slide.addText(cell.key+'  '+d.label, { x:cell.x+0.2,y:cell.y+0.1,
-      w:cW-0.4,h:0.45, fontSize:15, bold:true, color:cell.txtColor,
-      fontFace:'Microsoft YaHei' });
-    const bul = d.bullets.map(b=>({ text:'• '+b,
-      options:{ fontSize:12, color:cell.txtColor, fontFace:'Microsoft YaHei',
-        paraSpaceAfter:4, bullet:false }}));
-    slide.addText(bul, { x:cell.x+0.2,y:cell.y+0.6,w:cW-0.4,h:cH-0.7,
-      valign:'top' });
-  });
-}
-```
-
----
-
-## 版式 22 — 黄金圈版式
-
-**结构**：左侧三层嵌套椭圆（WHY内→HOW中→WHAT外）+ 右侧说明列
-
-**品牌色**：WHY内核=`#1770EA` / HOW中层=`#00CBFF` / WHAT外层=`#EEF2FF`
-
-```javascript
-function addGoldenCircleSlide(ppt, A, pageNum, title, gc) {
-  // gc: { WHY:{label,desc}, HOW:{label,desc}, WHAT:{label,desc} }
-  const slide = ppt.addSlide();
-  slide.addImage({ data: A.BG_TOC, x:0,y:0,w:13.3333,h:7.5 });
-  addLogo(slide, A, false); addFooter(slide, pageNum, false);
-  slide.addText(title, { x:0.5,y:0.25,w:12,h:0.45, fontSize:22, bold:true,
-    color:'1770EA', fontFace:'Microsoft YaHei' });
-  // 三层椭圆（用矩形+圆角模拟嵌套层）
-  const cx=3.4, cy=4.0;
-  const layers=[
-    { color:'EEF2FF', txtColor:'333333', w:5.6, h:4.8, label:'WHAT' },
-    { color:'00CBFF', txtColor:'FFFFFF', w:4.0, h:3.4, label:'HOW'  },
-    { color:'1770EA', txtColor:'FFFFFF', w:2.4, h:2.0, label:'WHY'  },
-  ];
-  layers.forEach(l=>{
-    slide.addShape(ppt.ShapeType.ellipse, {
-      x:cx-l.w/2, y:cy-l.h/2, w:l.w, h:l.h,
-      fill:{color:l.color}, line:{color:l.color} });
-    slide.addText(l.label, { x:cx-l.w/2, y:cy-l.h/2+0.1, w:l.w, h:0.4,
-      fontSize:11, bold:true, color:l.txtColor, align:'center',
-      fontFace:'Microsoft YaHei' });
-  });
-  // 右侧说明列
-  const rightX=7.0;
-  [['WHY','1770EA','FFFFFF'],['HOW','00CBFF','FFFFFF'],['WHAT','EEF2FF','333333']]
-    .forEach(([key,bg,fg], i)=>{
-      const d=gc[key], rY=1.4+i*1.8;
-      slide.addShape(ppt.ShapeType.roundRect, { x:rightX,y:rY,w:5.6,h:1.5,
-        fill:{color:bg}, line:{color:bg}, rectRadius:0.06 });
-      slide.addText(key+' — '+d.label, { x:rightX+0.2,y:rY+0.1,w:5.2,h:0.4,
-        fontSize:14, bold:true, color:fg, fontFace:'Microsoft YaHei' });
-      slide.addText(d.desc, { x:rightX+0.2,y:rY+0.55,w:5.2,h:0.85,
-        fontSize:12, color:fg, fontFace:'Microsoft YaHei', valign:'top' });
-    });
-}
-```
-
----
-
-## 版式 23 — 5W1H 六格版式
-
-**结构**：2行×3列均等卡片，顶部蓝色标签 + 内容区
-
-**品牌色**：标签顶块=`#1770EA`白字 / 内容区=`#EEF2FF`深字
-
-```javascript
-function add5W1HSlide(ppt, A, pageNum, title, items) {
-  // items: [{ key:'WHO', label:'谁', bullets:[] }, ...] 共6项，顺序 WHO/WHAT/WHEN/WHERE/WHY/HOW
-  const slide = ppt.addSlide();
-  slide.addImage({ data: A.BG_TOC, x:0,y:0,w:13.3333,h:7.5 });
-  addLogo(slide, A, false); addFooter(slide, pageNum, false);
-  slide.addText(title, { x:0.5,y:0.25,w:12,h:0.45, fontSize:22, bold:true,
-    color:'1770EA', fontFace:'Microsoft YaHei' });
-  const cW=3.9, cH=2.8, gap=0.2;
-  items.forEach((item, idx) => {
-    const col=idx%3, row=Math.floor(idx/3);
-    const x=0.5+col*(cW+gap), y=1.0+row*(cH+gap);
-    // 顶部标签块
-    slide.addShape(ppt.ShapeType.rect, { x,y,w:cW,h:0.55,
-      fill:{color:'1770EA'}, line:{color:'1770EA'} });
-    slide.addText(item.key+'  '+item.label, { x,y,w:cW,h:0.55,
-      fontSize:13, bold:true, color:'FFFFFF', align:'center',
-      fontFace:'Microsoft YaHei', valign:'middle' });
-    // 内容区
-    slide.addShape(ppt.ShapeType.rect, { x,y:y+0.55,w:cW,h:cH-0.55,
-      fill:{color:'EEF2FF'}, line:{color:'C8D4F8'} });
-    const bul=item.bullets.map(b=>({ text:'• '+b,
-      options:{ fontSize:12, color:'333333', fontFace:'Microsoft YaHei',
-        paraSpaceAfter:5, bullet:false }}));
-    slide.addText(bul, { x:x+0.15,y:y+0.65,w:cW-0.3,h:cH-0.75, valign:'top' });
-  });
-}
-```
-
----
-
-## 版式 24 — SCQA 四步流程版式
-
-**结构**：横向四格箭头流 + 底部说明行
-
-**品牌色**：S=`#EEF2FF`（深字）/ C=`#FFB800` / Q=`#8B6FE8` / A=`#1770EA`
-
-```javascript
-function addSCQASlide(ppt, A, pageNum, title, scqa) {
-  // scqa: { S:{label,desc}, C:{...}, Q:{...}, A:{...} }
-  const slide = ppt.addSlide();
-  slide.addImage({ data: A.BG_TOC, x:0,y:0,w:13.3333,h:7.5 });
-  addLogo(slide, A, false); addFooter(slide, pageNum, false);
-  slide.addText(title, { x:0.5,y:0.25,w:12,h:0.45, fontSize:22, bold:true,
-    color:'1770EA', fontFace:'Microsoft YaHei' });
-  const cells=[
-    { key:'S', bg:'EEF2FF', fg:'333333', x:0.4  },
-    { key:'C', bg:'FFB800', fg:'FFFFFF', x:3.55 },
-    { key:'Q', bg:'8B6FE8', fg:'FFFFFF', x:6.7  },
-    { key:'A', bg:'1770EA', fg:'FFFFFF', x:9.85 },
-  ];
-  const cW=2.9, topH=1.4, descH=2.8;
-  cells.forEach(cell=>{
-    const d=scqa[cell.key];
-    // 顶部色块
-    slide.addShape(ppt.ShapeType.roundRect, { x:cell.x,y:1.2,w:cW,h:topH,
-      fill:{color:cell.bg}, line:{color:cell.bg}, rectRadius:0.06 });
-    slide.addText(cell.key, { x:cell.x,y:1.3,w:cW,h:0.4,
-      fontSize:20, bold:true, color:cell.fg, align:'center',
-      fontFace:'Microsoft YaHei' });
-    slide.addText(d.label, { x:cell.x,y:1.75,w:cW,h:0.6,
-      fontSize:13, bold:true, color:cell.fg, align:'center',
-      fontFace:'Microsoft YaHei' });
-    // 箭头（最后一格不需要）
-    if(cell.key!=='A'){
-      slide.addText('→', { x:cell.x+cW+0.02,y:1.6,w:0.25,h:0.5,
-        fontSize:18, color:'AAAAAA', align:'center' });
-    }
-    // 说明区
-    slide.addShape(ppt.ShapeType.rect, { x:cell.x,y:2.85,w:cW,h:descH,
-      fill:{color:'F7F9FF'}, line:{color:'C8D4F8'} });
-    const bul=d.bullets? d.bullets.map(b=>({ text:'• '+b,
-      options:{ fontSize:12, color:'333333', fontFace:'Microsoft YaHei',
-        paraSpaceAfter:5, bullet:false }})) : [];
-    if(d.desc) bul.unshift({ text:d.desc,
-      options:{ fontSize:12, color:'555555', fontFace:'Microsoft YaHei',
-        paraSpaceAfter:8, bold:false }});
-    slide.addText(bul, { x:cell.x+0.12,y:2.95,w:cW-0.24,h:descH-0.2,
-      valign:'top' });
-  });
-}
-```
-
----
-
-## 版式 25 — IPD 五看版式
-
-**结构**：5列等宽卡片横排，顶部序号+标题色块（奇偶列交替主蓝/品青）+ 内容区
-
-**品牌色**：奇数列顶块=`#1770EA` / 偶数列顶块=`#00CBFF` / 内容区=`#EEF2FF`
-
-```javascript
-function addIPD5ViewSlide(ppt, A, pageNum, title, views) {
-  // views: [{ seq:'01', label:'看行业', point:'', data:'' }, ...] 共5项
-  const slide = ppt.addSlide();
-  slide.addImage({ data: A.BG_TOC, x:0,y:0,w:13.3333,h:7.5 });
-  addLogo(slide, A, false); addFooter(slide, pageNum, false);
-  slide.addText(title, { x:0.5,y:0.25,w:12,h:0.45, fontSize:22, bold:true,
-    color:'1770EA', fontFace:'Microsoft YaHei' });
-  const cW=2.3, gap=0.175, startX=0.5, topH=0.9, bodyH=4.6;
-  views.forEach((v, i)=>{
-    const x=startX+i*(cW+gap);
-    const topColor=i%2===0?'1770EA':'00CBFF';
-    // 序号+标题色块
-    slide.addShape(ppt.ShapeType.rect, { x,y:1.1,w:cW,h:topH,
-      fill:{color:topColor}, line:{color:topColor} });
-    slide.addText(v.seq, { x,y:1.15,w:cW,h:0.35,
-      fontSize:11, color:'FFFFFF', align:'center', fontFace:'Microsoft YaHei' });
-    slide.addText(v.label, { x,y:1.52,w:cW,h:0.42,
-      fontSize:13, bold:true, color:'FFFFFF', align:'center',
-      fontFace:'Microsoft YaHei' });
-    // 内容区
-    slide.addShape(ppt.ShapeType.rect, { x,y:2.0,w:cW,h:bodyH,
-      fill:{color:'EEF2FF'}, line:{color:'C8D4F8'} });
-    slide.addText(v.point, { x:x+0.1,y:2.1,w:cW-0.2,h:1.8,
-      fontSize:12, bold:true, color:'1770EA', fontFace:'Microsoft YaHei',
-      valign:'top', wrap:true });
-    slide.addText(v.data, { x:x+0.1,y:4.0,w:cW-0.2,h:1.9,
-      fontSize:11, color:'555555', fontFace:'Microsoft YaHei',
-      valign:'top', wrap:true });
-  });
-}
-```
+| **年度封底 / 战略口号** | **18 超大焦点页** | 极简震撼 || **核心主张 + 三大支柱** | **19 金字塔/MECE** | 专业严谨 |
+| **复盘述职 / 持续改进** | **20 PDCA 循环** | 专业严谨 |
+| **竞争/战略 四象限分析** | **21 SWOT 矩阵** | 专业严谨 |
+| **品牌故事 / WHY演讲** | **22 黄金圈** | 极简震撼 |
+| **方案说明 / 项目计划** | **23 5W1H 六格** | 专业严谨 |
+| **提案 / 问题分析报告** | **24 SCQA 四步** | 专业严谨 |
+| **战略发布 / 市场全景** | **25 IPD 五看** | 专业严谨 |
