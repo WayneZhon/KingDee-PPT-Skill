@@ -182,7 +182,7 @@ cp output.pptx /mnt/user-data/outputs/[文件名].pptx
 | 页脚 | 页码右下角；内容页左下角有保密声明 |
 | 封面 | 主标题在 y=2.247"；日期在 y=6.198"；无 Logo |
 | 目录 | 大号序号蓝色左对齐；页码在 x=11.008" |
-| 章节页 | 大数字 125pt #46CCFE；红线在 y=2.489" |
+| 章节页 | 大数字 125pt #00CCFE 加粗；装饰横线 #00CCFE，y=2.489"；标题 24pt 白色加粗；副标题 16pt 白色；全局字体 Microsoft YaHei |
 | 内容页 | 标题无竖线；内容从 y=1.503" 开始 |
 | 结尾页 | 多语言图片在 x=0.794" y=2.802"；无 Logo |
 
@@ -544,7 +544,7 @@ main().catch(e => { console.error(e); process.exit(1); });
 
 
 
-Linux 沙箱可能无微软雅黑，LibreOffice 转 PDF 时自动匹配相近字体，可能造成 ±0.05" 轻微排版偏差。`Segoe UI Emoji` 在 Linux 环境下可能降级为 Noto Emoji，图标字符视觉效果基本一致。最终在 Windows/Mac PowerPoint 中打开效果最优。
+Linux 沙箱可能无微软雅黑，LibreOffice 转 PDF 时自动匹配相近字体，可能造成 ±0.05" 轻微排版偏差。全局统一使用 `Microsoft YaHei`，最终在 Windows/Mac PowerPoint 中打开效果最优。
 
 ---
 
