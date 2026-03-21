@@ -1,7 +1,6 @@
 ---
 name: kingdee-ppt
 description: 将用户提供的文字、大纲或文档转化为金蝶国际软件集团官方PPT风格的完整幻灯片，直接生成 .pptx 文件。当用户说"做PPT"、"做个PPT"、"帮我做成金蝶PPT"、"按金蝶模板整理"、"生成幻灯片"、"整理成幻灯片"、"做个汇报材料"、"演示文稿"、"做个演示"、"输出PPT"、"生成deck"，或上传 .pptx/.docx 文档要求转化/重排为金蝶风格PPT时，必须使用此Skill。只要涉及PPT、幻灯片、汇报材料、演讲稿输出，就应触发本Skill。输出物为可直接使用的 .pptx 文件。
-compatibility: "requires: node>=16, python3>=3.8, libreoffice(soffice), pdftoppm(poppler-utils); npm: pptxgenjs>=3.12; pip: python-pptx>=0.6.21. Fallback: 若libreoffice/pdftoppm不可用则跳过视觉QA直接交付.pptx并告知用户；若python-pptx不可用则拒绝处理上传的.pptx/.docx文件。"
 ---
 
 # 金蝶 PPT 生成 Skill
@@ -23,23 +22,29 @@ compatibility: "requires: node>=16, python3>=3.8, libreoffice(soffice), pdftoppm
 ## 完整四阶段工作流
 
 ```
-第零阶段：思维模型识别【新增】
+第零阶段：思维模型识别
   0.1 → 扫描用户输入，检测内容结构信号
   0.2 → 置信度高 → 直接确定模型，写入后续大纲
   0.3 → 置信度低 → 标记为「标准版式」，不强行套模型
 
+第零点五阶段：AI 品牌 Logo 识别【新增】
+  0.5.1 → 扫描内容，匹配 AI 品牌/平台/模型关键词
+  0.5.2 → 查映射表，确定 lobe-icons slug 列表
+  0.5.3 → 在大纲对应页标注 [logo: slug1, slug2]
+  0.5.4 → 内容脚本阶段指定排版模式（卡片/Logo墙/行首）
+
 第一阶段：内容发现
   1.1 → 一次性提四个问题（ask_user_input 工具）
   1.2 → 图像评估（如有上传图片）
-  1.3 → 生成大纲（每页标注思维模型版式）→ 用户确认
+  1.3 → 生成大纲（每页标注思维模型版式 + logo 标注）→ 用户确认
 
 第二阶段：内容脚本
-  2.1 → 一次输出全部页面内容脚本（含模型排版指令）
+  2.1 → 一次输出全部页面内容脚本（含模型排版指令 + logo 嵌入指令）
   2.2 → 用户审阅反馈 → 确认定稿
 
 第三阶段：生成文件
-  3.1 → 编写 Node.js 构建脚本（含思维模型色块代码）
-  3.2 → 执行生成 → 转图 → 视觉 QA → 修复
+  3.1 → 编写 Node.js 构建脚本（含 lobe-icons 预加载 + 思维模型色块代码）
+  3.2 → 执行生成 → 转图 → 视觉 QA（含 logo 专项检查）→ 修复
   3.3 → 交付 .pptx 文件
 ```
 
@@ -80,6 +85,168 @@ compatibility: "requires: node>=16, python3>=3.8, libreoffice(soffice), pdftoppm
 - 大纲中每页单独标注版式类型（可同时存在 SWOT页、PDCA页、标准要点页）
 - 混用上限建议：单份 PPT 不超过 3 种思维模型版式，避免视觉割裂
 - 若检测到 4 种以上，优先保留主要模型，其余降级为「标准版式」
+
+---
+
+## 第零点五阶段：AI 品牌 Logo 识别（lobe-icons 自动嵌入）
+
+> 在完成 Phase 0 思维模型识别后、进入第一阶段前，**扫描全文识别 AI 品牌/平台/模型关键词**，并在内容脚本阶段为对应页面标注 logo 嵌入指令。
+
+---
+
+### 0.5.1 扫描触发条件
+
+满足以下任意一条即触发扫描：
+
+- 内容中出现 **AI 品牌名称**（如 DeepSeek、通义千问、华为云等）
+- 内容中出现 **大模型/AI 平台描述**（如"接入 GPT-4"、"调用文心一言"、"基于 Claude"）
+- 场景为「伙伴赋能」「客户大会」「方案提案」且内容涉及技术合作/生态展示
+
+---
+
+### 0.5.2 品牌识别映射表
+
+> ✅ 经过 `@lobehub/icons-static-svg` 本地安装验证，以下所有 slug 均真实存在。
+> 彩色版：slug 加 `-color` 后缀（如 `deepseek-color`）；文字版：加 `-text` 后缀。
+
+#### 🌐 国际 AI 大模型 & 平台
+
+| 用户内容关键词 | lobe-icons Slug | 备注 |
+|--------------|-----------------|------|
+| OpenAI / ChatGPT / GPT-4 / o1 / o3 | `openai` | 无彩色版，纯黑白 |
+| Claude / Anthropic / Claude Code | `claude` / `claudecode` | `claude-color` 有彩色版 |
+| Gemini / Google AI / Bard | `gemini` | `gemini-color` ✅ |
+| DeepSeek / 深度求索 | `deepseek` | `deepseek-color` ✅ |
+| Llama / Meta AI / Meta | `metaai` / `meta` | ⚠️ `llama` 不存在，用 `metaai` |
+| Mistral | `mistral` | `mistral-color` ✅ |
+| Cohere | `cohere` | `cohere-color` ✅ |
+| HuggingFace | `huggingface` | `huggingface-color` ✅ |
+| AWS / Amazon | `aws` | `aws-color` ✅ |
+| Amazon Bedrock | `bedrock` | `bedrock-color` ✅ |
+| Azure / Microsoft Azure | `azure` | `azure-color` ✅ |
+| Azure AI / Copilot | `azureai` / `copilot` | `azureai-color` ✅ |
+| Microsoft | `microsoft` | `microsoft-color` ✅ |
+| Google Cloud | `googlecloud` | `googlecloud-color` ✅ |
+| Groq | `groq` | 无彩色版 |
+| Perplexity | `perplexity` | `perplexity-color` ✅ |
+| Midjourney | `midjourney` | 无彩色版 |
+| Stable Diffusion / Stability AI | `stability` | `stability-color` ✅ |
+| Ollama（本地模型） | `ollama` | 无彩色版 |
+| GitHub Copilot | `githubcopilot` | 无彩色版 |
+| GitHub | `github` | 无彩色版 |
+| Cursor（AI IDE） | `cursor` | 无彩色版 |
+
+#### 🇨🇳 中国 AI 大模型 & 云平台
+
+| 用户内容关键词 | lobe-icons Slug | 备注 |
+|--------------|-----------------|------|
+| 通义千问 / Qwen | `qwen` | `qwen-color` ✅ |
+| 阿里云 / Aliyun / 百炼 | `alibabacloud` / `bailian` | `alibabacloud-color` ✅ |
+| Alibaba / 阿里巴巴（集团） | `alibaba` | `alibaba-color` ✅ |
+| 文心一言 / ERNIE / 百度 | `wenxin` / `baidu` | `wenxin-color` ✅ |
+| 百度智能云 | `baiducloud` | `baiducloud-color` ✅ |
+| 豆包 / Doubao | `doubao` | `doubao-color` ✅ |
+| 字节跳动 / ByteDance | `bytedance` | `bytedance-color` ✅ |
+| Kimi / 月之暗面 | `moonshot` | 无彩色版 |
+| 智谱 / ChatGLM / GLM / ZhipuAI | `chatglm` / `zhipu` | `chatglm-color` ✅ |
+| 混元 / 腾讯 Hunyuan | `hunyuan` | `hunyuan-color` ✅ |
+| 腾讯云 / Tencent Cloud | `tencentcloud` / `tencent` | `tencentcloud-color` ✅ |
+| 华为 / Huawei（集团） | `huawei` | `huawei-color` ✅ |
+| 华为云 / HuaweiCloud / 盘古 | `huaweicloud` | `huaweicloud-color` ✅ ← 优先用此 |
+| 讯飞 / 星火 / IFLYTEK Spark | `spark` | `spark-color` ✅ |
+| 百川 / Baichuan | `baichuan` | 无彩色版 |
+| 零一万物 / Yi / 01.AI | `yi` | `yi-color` ✅ |
+| MiniMax / 海螺 | `minimax` | `minimax-color` ✅ |
+| 智谱 CodeGeeX / 代码助手 | `codegeex` | 无彩色版 |
+| 360智脑 / 360 AI | `ai360` | `ai360-color` ✅ |
+| Coze / 扣子（字节） | `coze` | 无彩色版 |
+| FastGPT / 知识库平台 | `fastgpt` | `fastgpt-color` ✅ |
+
+#### 🔧 AI 开发基础设施（Skill 生态高频）
+
+| 用户内容关键词 | lobe-icons Slug | 备注 |
+|--------------|-----------------|------|
+| MCP / Model Context Protocol | `mcp` | 无彩色版，⭐ 苍穹Skill生态必备 |
+| LangChain | `langchain` | 确认存在 |
+| LlamaIndex | `llamaindex` | `llamaindex-color` ✅ |
+| CrewAI | `crewai` | 无彩色版 |
+| Suno（音乐AI） | `suno` | 无彩色版 |
+| Runway（视频AI） | `runway` | 无彩色版 |
+| Pika（视频AI） | `pika` | 无彩色版 |
+| DALL-E | `dalle` | 无彩色版 |
+
+> **CDN 地址格式**：
+> - npmmirror（国内首选，优先）：`https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/{slug}.svg`
+> - unpkg（国际备用）：`https://unpkg.com/@lobehub/icons-static-svg@latest/icons/{slug}.svg`
+> - PNG fallback：`https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/icons/{slug}.png`
+>
+> **彩色版规则**：深色（主蓝/品青）卡片背景 → 优先用 `{slug}-color`，浅色背景 → 用原色 `{slug}`
+
+---
+
+### 0.5.3 识别结果输出（在大纲阶段标注）
+
+在大纲每页末尾新增 `[logo: slug1, slug2]` 标注：
+
+```
+第 05 页  [内容-Bento卡片]  AI生态合作伙伴  [logo: huawei, alibaba, bytedance]
+第 07 页  [内容-要点列表]   多模型接入方案  [logo: openai, claude, deepseek]
+第 09 页  [内容-对比页]     模型能力对比    [logo: qwen, wenxin]
+```
+
+---
+
+### 0.5.4 Logo 排版规则
+
+| 场景 | 排版方式 | 尺寸 |
+|------|---------|------|
+| Bento 卡片页（每张卡片对应一个品牌） | 卡片左上角 logo 图标 + 右侧文字 | 0.45" × 0.45" |
+| 合作伙伴展示页（横排 logo 墙） | 底部横排均匀分布，灰色浅底衬托 | 0.5" × 0.5" |
+| 要点列表页（行首品牌标识） | 行首 logo 替代项目符号 | 0.3" × 0.3" |
+| 技术架构图（标注组件来源） | 色块旁边紧贴放置 | 0.35" × 0.35" |
+| 封面/章节页 | ❌ 不放 lobe-icons（避免喧宾夺主） | — |
+
+**颜色处理规则：**
+- 深色（主蓝/品青）背景卡片 → 使用 `{slug}-color.png` 彩色版，或白色单色版
+- 浅色/白色背景 → 使用 `{slug}.svg` 原色版
+- PNG fallback 路径：`https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/icons/{slug}.png`
+
+---
+
+### 0.5.5 内容脚本中的 Logo 标注格式
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【第 X 页】版式：[内容-Bento卡片]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+标题：苍穹生态AI伙伴矩阵
+
+卡片列表：
+  卡片1  [logo: huawei]     华为云
+         · 盘古大模型 + CodeArts IDE
+         · 联合开发者竞赛合作方
+  卡片2  [logo: alibaba]    阿里云
+         · 通义千问接入苍穹
+         · 云市场联合运营
+  卡片3  [logo: deepseek]   DeepSeek
+         · 企业级私有化部署方案
+         · 财务场景专属模型微调
+
+排版指令：3列等宽卡片，每卡左上角嵌入logo（0.45"），logo下方品牌名12pt灰色
+图片：无（全部用lobe-icons）
+```
+
+---
+
+### 0.5.6 执行限制与降级处理
+
+| 情况 | 处理方式 |
+|------|---------|
+| Slug 在映射表中找不到 | 跳过 logo，使用 emoji 替代（如 🤖），不报错 |
+| CDN 拉取失败（网络超时） | 自动切换备用 CDN；仍失败则跳过，大纲保留标注 |
+| SVG 转 PNG 失败 | 直接用 PNG CDN 地址拉取 fallback |
+| 单页 logo 数量 > 6 个 | 合并为「logo 墙」版式，底部横排，文字移至标题区 |
+| 用户说「不要 logo」/「不要图标」 | 跳过整个 0.5 阶段，不执行任何 lobe-icons 拉取 |
 
 ---
 
@@ -288,22 +455,186 @@ present_files 交付
 
 ---
 
-## 6种思维模型版式速查
+## 6种思维模型版式规范
 
-> 完整 PptxGenJS 代码、ASCII 结构图、色值约束见 `layout-presets.md § 版式 19–25`。
-> 内容脚本阶段按下表选版式即可，无需在此处查色值。
+> ⚠️ **完整 PptxGenJS 代码见 `layout-presets.md § 版式 19-25`**，下方仅列排版原则和色块结构，供内容脚本阶段参照。
 
-| 模型 | 版式编号 | 结构关键词 | 适用场景 |
-|------|---------|-----------|---------|
-| A 金字塔/MECE | 版式 19 | 结论→分论点→论据（三级） | 汇报、战略解读 |
-| B PDCA 循环 | 版式 20 | 4格顺时针＋中央↻ | 复盘、质量管理 |
-| C SWOT 矩阵 | 版式 21 | 2×2矩阵＋内外/优劣轴 | 竞争分析、战略规划 |
-| D 黄金圈 | 版式 22 | 三层嵌套椭圆＋右侧说明列 | 产品发布、品牌故事 |
-| E 5W1H 六格 | 版式 23 | 2行×3列卡片 | 方案说明、项目计划 |
-| F SCQA 四步流 | 版式 24 | 横向四格箭头＋底部说明行 | 提案、问题分析 |
-| G IPD 五看 | 版式 25 | 5列等宽卡片＋奇偶色交替 | 市场分析、生态大会 |
+---
 
-> ⚠️ **颜色约束**：PPT 中只允许使用 `style-guide.md` 品牌色盘内的颜色。禁止使用红色 `#E8210A`、品金 `#FFC000` 及任何不在色盘中的颜色。色值权威定义以 `style-guide.md` 为准。
+### 模型 A：金字塔 / MECE 版式（→ 版式 19）
+
+**结构**：顶部结论 → 中层分论点 → 底层论据（三级分层）
+
+```
+┌────────────────────────────────┐  ← 主蓝 #1770EA，白字，结论一句话（全宽 1/4页高）
+│           核心结论              │
+└────────────────────────────────┘
+┌──────────┐ ┌──────────┐ ┌──────────┐  ← 黄色 #FFB800，白字，分论点（三列等宽）
+│  分论点1  │ │  分论点2  │ │  分论点3  │
+└──────────┘ └──────────┘ └──────────┘
+  · 论据1       · 论据1       · 论据1     ← 浅灰蓝底 #EEF2FF，深色小字
+```
+
+**品牌色**：结论=主蓝`#1770EA` / 分论点=黄色`#FFB800` / 论据=浅灰蓝`#EEF2FF`
+
+---
+
+### 模型 B：PDCA 循环版式（→ 版式 20）
+
+**结构**：4格顺时针排布，中央循环符号
+
+```
+  ┌────────┐   ┌────────┐
+  │ P 计划 │ → │ D 执行 │
+  └────────┘   └────────┘
+      ↑    ↻       ↓
+  ┌────────┐   ┌────────┐
+  │ A 改进 │ ← │ C 检查 │
+  └────────┘   └────────┘
+```
+
+**品牌色**：P=主蓝`#1770EA` / D=品青`#00CBFF` / C=黄色`#FFB800` / A=紫色`#8B6FE8`
+
+---
+
+### 模型 C：SWOT 矩阵版式（→ 版式 21）
+
+**结构**：2×2 矩阵，横纵轴标注内外/优劣维度
+
+```
+              内部因素              外部因素
+优势/机会  ┌──────────────────┐  ┌──────────────────┐
+           │ S  优势           │  │ O  机会           │
+           └──────────────────┘  └──────────────────┘
+劣势/威胁  ┌──────────────────┐  ┌──────────────────┐
+           │ W  劣势           │  │ T  威胁           │
+           └──────────────────┘  └──────────────────┘
+```
+
+**品牌色**：S=主蓝`#1770EA` / O=蓝绿`#00C4A7` / W=浅灰蓝`#EEF2FF`(深字) / T=紫色`#8B6FE8`
+
+---
+
+### 模型 D：黄金圈版式（→ 版式 22）
+
+**结构**：三层嵌套椭圆（WHY→HOW→WHAT 由内到外）+ 右侧说明列
+
+```
+左侧（椭圆嵌套）：              右侧（说明列）：
+┌─── WHAT 浅灰 ───────────┐     [WHY蓝] WHY — 为什么做：核心使命
+│  ┌─── HOW 品青 ───┐     │     [HOW青] HOW — 怎么做：方法路径
+│  │  ┌─ WHY 蓝 ─┐  │     │     [WHAT灰] WHAT — 做什么：产品服务
+│  │  └──────────┘  │     │
+│  └───────────────┘      │
+└─────────────────────────┘
+```
+
+**品牌色**：WHY内核=主蓝`#1770EA` / HOW中层=品青`#00CBFF` / WHAT外层=浅灰蓝`#EEF2FF`
+
+---
+
+### 模型 E：5W1H 六格版式（→ 版式 23）
+
+**结构**：2行×3列均等卡片，顶部蓝色标签 + 内容区
+
+```
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│ WHO  谁      │  │ WHAT  什么   │  │ WHEN  何时   │
+├──────────────┤  ├──────────────┤  ├──────────────┤
+│ · 内容要点   │  │ · 内容要点   │  │ · 内容要点   │
+└──────────────┘  └──────────────┘  └──────────────┘
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│ WHERE  何地  │  │ WHY  为何    │  │ HOW  如何    │
+├──────────────┤  ├──────────────┤  ├──────────────┤
+│ · 内容要点   │  │ · 内容要点   │  │ · 内容要点   │
+└──────────────┘  └──────────────┘  └──────────────┘
+```
+
+**品牌色**：卡片顶部标签=主蓝`#1770EA`白字 / 内容区=浅灰蓝`#EEF2FF`深字
+
+---
+
+### 模型 F：SCQA 四步流程版式（→ 版式 24）
+
+**结构**：四步横向箭头流 + 底部内容说明行
+
+```
+[S 场景] → [C 冲突] → [Q 问题] → [A 解决]
+ 浅灰底      品金底      紫色底      主蓝底
+  ↓            ↓           ↓           ↓
+ 说明文字    说明文字    说明文字    说明文字
+```
+
+**品牌色**：S=浅灰蓝`#EEF2FF`(深字) / C=黄色`#FFB800` / Q=紫色`#8B6FE8` / A=主蓝`#1770EA`
+
+---
+
+### 模型 G：IPD 五看版式（→ 版式 25）【新增】
+
+**结构**：5列等宽卡片横排，顶部序号色块 + 内容区
+
+```
+┌──────┐  ┌──────┐  ┌──────┐  ┌──────┐  ┌──────┐
+│ 01   │  │ 02   │  │ 03   │  │ 04   │  │ 05   │
+│看行业│  │看客户│  │看机会│  │看竞争│  │看自己│
+├──────┤  ├──────┤  ├──────┤  ├──────┤  ├──────┤
+│核心  │  │核心  │  │核心  │  │核心  │  │核心  │
+│观点  │  │观点  │  │观点  │  │观点  │  │观点  │
+│      │  │      │  │      │  │      │  │      │
+│支撑  │  │支撑  │  │支撑  │  │支撑  │  │支撑  │
+│数据  │  │数据  │  │数据  │  │数据  │  │数据  │
+└──────┘  └──────┘  └──────┘  └──────┘  └──────┘
+```
+
+**品牌色**：奇数列顶块=主蓝`#1770EA` / 偶数列顶块=品青`#00CBFF` / 内容区=浅灰蓝`#EEF2FF`
+
+**脚本格式：**
+```
+模型结构：
+  看行业：[核心观点] + [支撑数据/趋势]
+  看客户：[核心观点] + [典型诉求/洞察]
+  看机会：[核心观点] + [市场规模/增速]
+  看竞争：[核心观点] + [竞品/差异化]
+  看自己：[核心观点] + [优势/短板]
+
+排版指令：5列等宽，顶部序号+标题色块（交替主蓝/品青），内容区浅灰蓝底
+```
+
+---
+
+## 品牌色语义映射总表
+
+> ⚠️ 严格约束：PPT 中**只允许使用以下颜色**，禁止使用任何不在此列表中的颜色（尤其禁止红色 `#E8210A`）。
+
+### 主色系
+
+| 品牌色 | 色值 | 思维模型中的语义角色 |
+|--------|------|---------------------|
+| 主蓝（纯） | `#1770EA` | 核心结论 / 首要模块 / WHY / Plan / Strengths / Answer |
+| 主蓝（渐变起点） | `#4DA6FF` | 封面渐变 / 图表渐变起点 / 装饰用 |
+| 白色 | `#FFFFFF` | 所有深色背景上的文字 / 卡片底色 |
+
+### 辅助色系
+
+| 品牌色 | 色值 | 思维模型中的语义角色 |
+|--------|------|---------------------|
+| 天蓝 | `#38B6FF` | 次级信息 / 流程辅助块 / 图表配色 |
+| 品青（青蓝） | `#00CBFF` | 执行流程 / 方法层 / HOW / Do |
+| 蓝绿（青绿） | `#00C4A7` | 增长正面 / 机会 / Opportunities |
+| 紫色 | `#8B6FE8` | 挑战冲突 / 威胁风险 / Act改进 / Question / Threats / Complication |
+| 黄色 | `#FFB800` | 强调要素 / 改进提示 / WHAT / Check / 警示信息 |
+| 深蓝黑 | `#1A1A3E` | 强对比文字 / 深色强调块 / 图表深色底 |
+| 深灰 | `#333333` | 正文文字 / 浅色背景上的标注 |
+| 中灰 | `#AAAAAA` | 辅助说明文字 / 次级标注 / 分割线 |
+| 浅灰蓝 | `#EEF2FF` | 二级信息底色 / 论据区 / Weaknesses / Situation |
+
+### 颜色禁止清单
+
+| 禁止颜色 | 原因 |
+|---------|------|
+| ❌ 红色 `#E8210A` | 不在官方色盘中 |
+| ❌ 品金 `#FFC000` | 已替换为官方黄色 `#FFB800` |
+| ❌ 任何不在上表中的颜色 | 破坏品牌一致性 |
 
 ---
 
@@ -339,3 +670,7 @@ present_files 交付
 | 检测到4种以上模型 | 保留主要3种，其余降级为标准版式，大纲中注明 |
 | 用户上传已有 .pptx | 先用 python-pptx 解析脚本（见 `pptx-builder.md §3`）提取内容，再走完整四阶段重排为金蝶风格 |
 | 用户提供数据要求图表 | 收集数据后用 `pptx.addChart()` 插入（见 `pptx-builder.md §10`），在大纲标注「[图表页-折线/柱/饼]」 |
+| 内容含 AI 品牌/大模型关键词 | 触发 Phase 0.5 扫描，查映射表，大纲页标注 `[logo: slug]`，生成阶段调用 `preloadLobeIcons()` 批量拉取（见 `pptx-builder.md §10`） |
+| 用户说「不要 logo」/「不加 logo」 | 跳过 Phase 0.5，ALL_SLUGS 设为空数组，不调用 lobe-icons CDN |
+| lobe-icons 某个 slug 不存在 | 静默跳过，该格改用 emoji（如 🤖 🔬 ☁️），日志输出 `⚠️ lobe-icon 加载失败，跳过: {slug}` |
+| 网络环境无法访问 CDN | 先尝试 npmmirror，再尝试 unpkg，均失败则跳过 logo，PPT 正常生成不中断 |
