@@ -220,11 +220,13 @@ function addTOCSlide(pres, A, sections, pageNum) {
   ];
   sections.slice(0, 4).forEach((sec, i) => {
     const row = ROW_Y[i];
-    s.addText(sec.num, { x:0.429, y:row.numY, w:1.151, h:0.908, fontSize:80, color:'1770EA', bold:true, fontFace:'Microsoft YaHei', margin:0, valign:'top' });
-    s.addText(sec.title, { x:1.791, y:row.titleY, w:7.221, h:0.449, fontSize:20, color:'262626', bold:true, fontFace:'Microsoft YaHei', margin:0, valign:'middle' });
-    if (sec.sub) s.addText(sec.sub, { x:1.791, y:row.subY, w:7.221, h:0.312, fontSize:13, color:'888888', fontFace:'Microsoft YaHei', margin:0 });
+    // 调整数字区域宽度至 2.0" 以容纳 80 大小的字符（80pt 字符推荐宽度）
+    s.addText(sec.num, { x:0.429, y:row.numY, w:2.000, h:0.908, fontSize:80, color:'1770EA', bold:true, fontFace:'Microsoft YaHei', margin:0, valign:'top' });
+    // 标题区域相应调整（向右移动 0.6"，宽度减少 0.6"）
+    s.addText(sec.title, { x:2.582, y:row.titleY, w:6.250, h:0.449, fontSize:20, color:'262626', bold:true, fontFace:'Microsoft YaHei', margin:0, valign:'middle' });
+    if (sec.sub) s.addText(sec.sub, { x:2.582, y:row.subY, w:6.250, h:0.312, fontSize:13, color:'888888', fontFace:'Microsoft YaHei', margin:0 });
     s.addText(`P  ${String(sec.page).padStart(2,'0')}`, { x:11.008, y:row.pageY, w:1.327, h:0.443, fontSize:14, color:'1770EA', fontFace:'Microsoft YaHei', align:'right', margin:0 });
-    if (i < sections.length - 1) s.addShape(pres.ShapeType.line, { x:1.791, y:row.subY+0.35, w:10.5, h:0, line:{ color:'DDDDDD', width:0.5 } });
+    if (i < sections.length - 1) s.addShape(pres.ShapeType.line, { x:2.582, y:row.subY+0.35, w:9.9, h:0, line:{ color:'DDDDDD', width:0.5 } });
   });
   addFooter(s, pageNum, false);
 }
