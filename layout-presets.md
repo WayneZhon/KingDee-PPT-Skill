@@ -1,6 +1,7 @@
-# 金蝶 PPT 版式预设 Layout Presets v2.0
+# 金蝶 PPT 版式预设 Layout Presets v3.0
 > 所有坐标基于 LAYOUT_WIDE（13.3333" × 7.5"），从官方模板 XML 精确提取（2026版）。
 > v2.0 新增：版式 11-18（Bento Grid 系列、数据看板、架构生态、金句页等）
+> v3.0 新增：版式 26-29（图标行、半出血叠加、悬浮统计、对比栏）+ 设计规范对齐
 
 ---
 
@@ -36,9 +37,9 @@ function loadAllAssets() {
 }
 
 // ─── Shadow 工厂（必须每次 new，避免 PptxGenJS 对象变异 bug）──────
-const mkSh  = () => ({ type:'outer', blur:12, offset:4, angle:135, color:'000000', opacity:0.10 });
-const mkShS = () => ({ type:'outer', blur:6,  offset:2, angle:135, color:'000000', opacity:0.07 });
-const mkShB = () => ({ type:'outer', blur:16, offset:6, angle:135, color:'1770EA',  opacity:0.12 });
+const mkSh  = () => ({ type:'outer', blur:8,  offset:3, angle:135, color:'000000', opacity:0.08 }); // elevation-2
+const mkShS = () => ({ type:'outer', blur:4,  offset:1, angle:135, color:'000000', opacity:0.05 }); // elevation-1
+const mkShB = () => ({ type:'outer', blur:14, offset:4, angle:135, color:'2971EB',  opacity:0.10 }); // elevation-3 brand glow
 
 // ─── Logo ────────────────────────────────────────────────────────
 function addLogo(slide, A, onDark) {
@@ -53,12 +54,12 @@ function addFooter(slide, pageNum, onDark) {
   if (!onDark) {
     slide.addText('④ 内部公开 请勿外传', {
       x: 11.355, y: 7.017, w: 1.327, h: 0.190,
-      fontSize: 8, color: 'AAAAAA', fontFace: 'Microsoft YaHei', margin: 0
+      fontSize: 8, color: 'BFBFBF', fontFace: 'Microsoft YaHei', margin: 0
     });
   }
   slide.addText(String(pageNum), {
     x: 12.845, y: 7.051, w: 0.384, h: 0.150,
-    fontSize: 10, color: onDark ? 'FFFFFF' : '2A71EC',
+    fontSize: 10, color: onDark ? 'FFFFFF' : '2971EB',
     align: 'right', fontFace: 'Microsoft YaHei', margin: 0
   });
 }
@@ -67,13 +68,13 @@ function addFooter(slide, pageNum, onDark) {
 function addContentTitle(slide, title, subtitle) {
   slide.addText(title, {
     x: 0.435, y: 0.230, w: 10.601, h: 0.513,
-    fontSize: 24, color: '262626', bold: true,
+    fontSize: 28, color: '373838', bold: true,
     fontFace: 'Microsoft YaHei', margin: 0, valign: 'middle'
   });
   if (subtitle) {
     slide.addText(subtitle, {
       x: 0.435, y: 0.747, w: 8.523, h: 0.312,
-      fontSize: 16, color: '888888', bold: false,
+      fontSize: 14, color: 'BFBFBF', bold: false,
       fontFace: 'Microsoft YaHei', margin: 0, valign: 'middle'
     });
   }
@@ -85,26 +86,26 @@ function addContentTitle(slide, title, subtitle) {
  * @param {Object} slide - 目标幻灯片
  * @param {Object} opts  - 卡片配置
  *   x, y, w, h       : 位置尺寸（英寸）
- *   fillColor         : 卡片底色，默认 'F5F7FA'
+ *   fillColor         : 卡片底色，默认 'E7F1FF'
  *   title             : 标题文字
- *   titleColor        : 标题颜色，默认 '1770EA'
+ *   titleColor        : 标题颜色，默认 '2971EB'
  *   body              : 正文文字（可选）
- *   bodyColor         : 正文颜色，默认 '333333'
+ *   bodyColor         : 正文颜色，默认 '373838'
  *   bigNumber         : 超大数字（可选，替代图标）
- *   numberColor       : 大数字颜色，默认 'FFFFFF'（深色卡）或 '1770EA'（浅色卡）
+ *   numberColor       : 大数字颜色，默认 'FFFFFF'（深色卡）或 '2971EB'（浅色卡）
  *   icon              : emoji 图标字符（可选）
  *   hasShadow         : 是否加阴影，默认 true
  */
 function bentoCard(pres, slide, opts) {
   const {
     x, y, w, h,
-    fillColor = 'F5F7FA',
+    fillColor = 'E7F1FF',
     title = '',
-    titleColor = fillColor === '1770EA' ? 'FFFFFF' : '1770EA',
+    titleColor = fillColor === '2971EB' ? 'FFFFFF' : '2971EB',
     body = '',
-    bodyColor = fillColor === '1770EA' ? 'D0E8FF' : '555555',
+    bodyColor = fillColor === '2971EB' ? 'E7F1FF' : '373838',
     bigNumber = '',
-    numberColor = fillColor === '1770EA' ? 'FFFFFF' : '1770EA',
+    numberColor = fillColor === '2971EB' ? 'FFFFFF' : '2971EB',
     icon = '',
     hasShadow = true,
   } = opts;
@@ -112,7 +113,7 @@ function bentoCard(pres, slide, opts) {
   const shapeOpts = {
     x, y, w, h,
     fill: { color: fillColor },
-    rectRadius: 0.08,
+    rectRadius: 0.15,
   };
   if (hasShadow) shapeOpts.shadow = mkShS();
   slide.addShape(pres.ShapeType.roundRect, shapeOpts);
@@ -143,7 +144,7 @@ function bentoCard(pres, slide, opts) {
 
   // 标题
   if (title) {
-    const titleSize = fillColor === '1770EA' ? 18 : 16;
+    const titleSize = fillColor === '2971EB' ? 18 : 16;
     slide.addText(title, {
       x: x + pad, y: curY, w: w - pad * 2, h: 0.42,
       fontSize: titleSize, bold: true, color: titleColor,
@@ -165,7 +166,7 @@ function bentoCard(pres, slide, opts) {
   }
 }
 
-const COLOR_SEQ = ['1770EA', '00CBFF', '00C7C7', 'AF6EFF', 'FFC000'];
+const COLOR_SEQ = ['2971EB', '22AAFE', '05C8C8', '966EFF', 'FFB61A'];
 ```
 
 ---
@@ -186,7 +187,7 @@ function addCoverSlide(pres, A, { title, subtitle, author, dept, date }, pageNum
   if (subtitle) {
     s.addText(subtitle, {
       x: 0.917, y: 3.8, w: 8.0, h: 0.55,
-      fontSize: 20, color: 'D0EEFF', bold: false,
+      fontSize: 20, color: 'E7F1FF', bold: false,
       fontFace: 'Microsoft YaHei', margin: 0
     });
   }
@@ -194,8 +195,8 @@ function addCoverSlide(pres, A, { title, subtitle, author, dept, date }, pageNum
   if (dept)   s.addText(dept,   { x:0.917, y:5.715, w:3.002, h:0.473, fontSize:16, color:'FFFFFF', fontFace:'Microsoft YaHei', margin:0 });
   s.addText(date || '', { x:0.911, y:6.198, w:3.008, h:0.330, fontSize:16, color:'FFFFFF', fontFace:'Microsoft YaHei', margin:0 });
   s.addText('版权所有 © 金蝶国际软件集团有限公司   始创于 1993', {
-    x:1.007, y:7.023, w:3.415, h:0.166, fontSize:8, color:'AACCDD', fontFace:'Microsoft YaHei', margin:0 });
-  s.addText('④ 内部公开 请勿外传', { x:3.877, y:6.998, w:1.599, h:0.190, fontSize:8, color:'AACCDD', fontFace:'Microsoft YaHei', margin:0 });
+    x:1.007, y:7.023, w:3.415, h:0.166, fontSize:8, color:'BFBFBF', fontFace:'Microsoft YaHei', margin:0 });
+  s.addText('④ 内部公开 请勿外传', { x:3.877, y:6.998, w:1.599, h:0.190, fontSize:8, color:'BFBFBF', fontFace:'Microsoft YaHei', margin:0 });
 }
 ```
 
@@ -208,7 +209,7 @@ function addTOCSlide(pres, A, sections, pageNum) {
   const s = pres.addSlide();
   s.addImage({ data: A.BG_TOC, x: 0, y: 0, w: 13.333, h: 7.500 });
   addLogo(s, A, false);
-  s.addText('目  录', { x:0.435, y:0.230, w:4.0, h:0.513, fontSize:24, color:'262626', bold:true, fontFace:'Microsoft YaHei', margin:0 });
+  s.addText('目  录', { x:0.435, y:0.230, w:4.0, h:0.513, fontSize:24, color:'373838', bold:true, fontFace:'Microsoft YaHei', margin:0 });
   const ROW_Y = [
     { numY:1.805, titleY:1.847, subY:2.343, pageY:1.900 },
     { numY:3.073, titleY:3.061, subY:3.510, pageY:3.080 },
@@ -217,11 +218,12 @@ function addTOCSlide(pres, A, sections, pageNum) {
   ];
   sections.slice(0, 4).forEach((sec, i) => {
     const row = ROW_Y[i];
-    s.addText(sec.num, { x:0.429, y:row.numY, w:1.151, h:0.908, fontSize:80, color:'1770EA', bold:true, fontFace:'Microsoft YaHei', margin:0, valign:'top' });
-    s.addText(sec.title, { x:1.791, y:row.titleY, w:7.221, h:0.449, fontSize:20, color:'262626', bold:true, fontFace:'Microsoft YaHei', margin:0, valign:'middle' });
-    if (sec.sub) s.addText(sec.sub, { x:1.791, y:row.subY, w:7.221, h:0.312, fontSize:13, color:'888888', fontFace:'Microsoft YaHei', margin:0 });
-    s.addText(`P  ${String(sec.page).padStart(2,'0')}`, { x:11.008, y:row.pageY, w:1.327, h:0.443, fontSize:14, color:'1770EA', fontFace:'Microsoft YaHei', align:'right', margin:0 });
-    if (i < sections.length - 1) s.addShape(pres.ShapeType.line, { x:1.791, y:row.subY+0.35, w:10.5, h:0, line:{ color:'DDDDDD', width:0.5 } });
+    // ⚠️ num 宽度按「容纳两个80pt字符」设计：2× (80/72)≈2.22" → 取2.400"加余量
+    s.addText(sec.num, { x:0.429, y:row.numY, w:2.400, h:0.908, fontSize:80, color:'2971EB', bold:true, fontFace:'Microsoft YaHei', margin:0, valign:'top' });
+    s.addText(sec.title, { x:3.050, y:row.titleY, w:7.650, h:0.449, fontSize:20, color:'373838', bold:true, fontFace:'Microsoft YaHei', margin:0, valign:'middle' });
+    if (sec.sub) s.addText(sec.sub, { x:3.050, y:row.subY, w:7.650, h:0.312, fontSize:13, color:'BFBFBF', fontFace:'Microsoft YaHei', margin:0 });
+    s.addText(`P  ${String(sec.page).padStart(2,'0')}`, { x:11.008, y:row.pageY, w:1.327, h:0.443, fontSize:14, color:'2971EB', fontFace:'Microsoft YaHei', align:'right', margin:0 });
+    if (i < sections.length - 1) s.addShape(pres.ShapeType.line, { x:3.050, y:row.subY+0.35, w:9.241, h:0, line:{ color:'BFBFBF', width:0.5 } });
   });
   addFooter(s, pageNum, false);
 }
@@ -259,8 +261,8 @@ function addBulletSlide(pres, A, { title, subtitle, points }, pageNum) {
     options: {
       bullet: true,
       breakLine: i < points.length - 1,
-      fontSize: p.bold ? 20 : 18,
-      color: p.highlight ? '1770EA' : (p.gold ? 'FFC000' : '333333'),
+      fontSize: p.bold ? 16 : 14,
+      color: p.highlight ? '2971EB' : (p.gold ? 'FFB61A' : '373838'),
       bold: p.bold || false,
       fontFace: 'Microsoft YaHei',
       paraSpaceAfter: 16,
@@ -287,11 +289,11 @@ function addDataCardSlide(pres, A, { title, subtitle, cards }, pageNum) {
   cards.forEach((c, i) => {
     const x = sX + i * (cW + 0.24);
     const col = c.color || COLOR_SEQ[i % COLOR_SEQ.length];
-    s.addShape(pres.ShapeType.rect, { x, y:cY, w:cW, h:cH, fill:{ color:'F7F9FC' }, shadow:mkShS() });
+    s.addShape(pres.ShapeType.roundRect, { x, y:cY, w:cW, h:cH, fill:{ color:'E7F1FF' }, rectRadius:0.15, shadow:mkShS() });
     s.addShape(pres.ShapeType.rect, { x, y:cY, w:cW, h:0.55, fill:{ color:col } });
     s.addText(c.label || '', { x, y:cY, w:cW, h:0.55, fontSize:15, color:'FFFFFF', bold:true, fontFace:'Microsoft YaHei', align:'center', margin:0, valign:'middle' });
     s.addText((c.num || '') + (c.unit ? (' ' + c.unit) : ''), { x, y:cY+0.70, w:cW, h:1.50, fontSize:60, color:col, bold:true, fontFace:'Microsoft YaHei', align:'center', margin:0, valign:'middle' });
-    if (c.sub) s.addText(c.sub, { x:x+0.12, y:cY+2.30, w:cW-0.24, h:2.8, fontSize:14, color:'555555', fontFace:'Microsoft YaHei', valign:'top', margin:0, wrap:true });
+    if (c.sub) s.addText(c.sub, { x:x+0.12, y:cY+2.30, w:cW-0.24, h:2.8, fontSize:14, color:'373838', fontFace:'Microsoft YaHei', valign:'top', margin:0, wrap:true });
   });
   addFooter(s, pageNum, false);
 }
@@ -308,11 +310,11 @@ function addCompareSlide(pres, A, { title, subtitle, left, right }, pageNum) {
   addLogo(s, A, false);
   addContentTitle(s, title, subtitle);
   [[left, 0.434], [right, 6.70]].forEach(([col, x]) => {
-    const c = col.color || '1770EA', w = 6.05;
-    s.addShape(pres.ShapeType.rect, { x, y:1.55, w, h:5.1, fill:{ color:'F7F9FC' }, shadow:mkShS() });
+    const c = col.color || '2971EB', w = 6.05;
+    s.addShape(pres.ShapeType.roundRect, { x, y:1.55, w, h:5.1, fill:{ color:'E7F1FF' }, rectRadius:0.15, shadow:mkShS() });
     s.addShape(pres.ShapeType.rect, { x, y:1.55, w, h:0.62, fill:{ color:c } });
     s.addText(col.title, { x, y:1.55, w, h:0.62, fontSize:18, color:'FFFFFF', bold:true, fontFace:'Microsoft YaHei', align:'center', margin:0, valign:'middle' });
-    const pts = (col.points||[]).map((p,j) => ({ text:p.text, options:{ bullet:true, breakLine:j<col.points.length-1, fontSize:16, color:p.bold?c:'333333', bold:p.bold||false, fontFace:'Microsoft YaHei', paraSpaceAfter:12 } }));
+    const pts = (col.points||[]).map((p,j) => ({ text:p.text, options:{ bullet:true, breakLine:j<col.points.length-1, fontSize:16, color:p.bold?c:'373838', bold:p.bold||false, fontFace:'Microsoft YaHei', paraSpaceAfter:12 } }));
     if (pts.length) s.addText(pts, { x:x+0.18, y:2.28, w:w-0.36, h:4.22, valign:'top' });
   });
   addFooter(s, pageNum, false);
@@ -333,13 +335,13 @@ function addFlowSlide(pres, A, { title, subtitle, steps, note }, pageNum) {
   const sW = (aW - (n-1)*0.28) / n, sY = 2.0, sH = 3.5;
   steps.forEach((step, i) => {
     const x = sX + i*(sW+0.28), c = COLOR_SEQ[i % COLOR_SEQ.length];
-    s.addShape(pres.ShapeType.rect, { x, y:sY, w:sW, h:sH, fill:{ color:'F7F9FC' }, shadow:mkShS() });
+    s.addShape(pres.ShapeType.roundRect, { x, y:sY, w:sW, h:sH, fill:{ color:'E7F1FF' }, rectRadius:0.15, shadow:mkShS() });
     s.addShape(pres.ShapeType.rect, { x, y:sY, w:sW, h:0.52, fill:{ color:c } });
     s.addText(`Step ${i+1}`, { x, y:sY, w:sW, h:0.52, fontSize:14, color:'FFFFFF', bold:true, fontFace:'Microsoft YaHei', align:'center', margin:0, valign:'middle' });
-    s.addText(step.text, { x:x+0.1, y:sY+0.62, w:sW-0.2, h:sH-0.72, fontSize:14, color:'333333', fontFace:'Microsoft YaHei', valign:'top', margin:4 });
+    s.addText(step.text, { x:x+0.1, y:sY+0.62, w:sW-0.2, h:sH-0.72, fontSize:14, color:'373838', fontFace:'Microsoft YaHei', valign:'top', margin:4 });
     if (i < n-1) s.addShape(pres.ShapeType.rect, { x:x+sW+0.04, y:sY+sH/2-0.04, w:0.20, h:0.07, fill:{ color:'CCCCCC' } });
   });
-  if (note) s.addText(`⚠ ${note}`, { x:0.434, y:5.8, w:12.256, h:0.35, fontSize:12, color:'FFC000', fontFace:'Microsoft YaHei', margin:0 });
+  if (note) s.addText(`⚠ ${note}`, { x:0.434, y:5.8, w:12.256, h:0.35, fontSize:12, color:'FFB61A', fontFace:'Microsoft YaHei', margin:0 });
   addFooter(s, pageNum, false);
 }
 ```
@@ -360,10 +362,10 @@ function addImageTextSlide(pres, A, { title, subtitle, imgData, imgSide, placeho
   if (imgData) {
     s.addImage({ data:imgData, x:imgX, y:cY, w:imgW, h:imgH, sizing:{ type:'contain', w:imgW, h:imgH } });
   } else {
-    s.addShape(pres.ShapeType.rect, { x:imgX, y:cY, w:imgW, h:imgH, fill:{ color:'EBF3FF' }, line:{ color:'1770EA', width:1, dashType:'dash' } });
-    if (placeholder) s.addText(placeholder, { x:imgX, y:cY+imgH/2-0.3, w:imgW, h:0.6, fontSize:14, color:'1770EA', align:'center', italic:true, fontFace:'Microsoft YaHei', margin:0 });
+    s.addShape(pres.ShapeType.rect, { x:imgX, y:cY, w:imgW, h:imgH, fill:{ color:'E7F1FF' }, line:{ color:'2971EB', width:1, dashType:'dash' } });
+    if (placeholder) s.addText(placeholder, { x:imgX, y:cY+imgH/2-0.3, w:imgW, h:0.6, fontSize:14, color:'2971EB', align:'center', italic:true, fontFace:'Microsoft YaHei', margin:0 });
   }
-  const items = (points||[]).map((p,i) => ({ text:p.text, options:{ bullet:true, breakLine:i<points.length-1, fontSize:p.bold?19:17, color:p.highlight?'1770EA':'333333', bold:p.bold||false, fontFace:'Microsoft YaHei', paraSpaceAfter:14 } }));
+  const items = (points||[]).map((p,i) => ({ text:p.text, options:{ bullet:true, breakLine:i<points.length-1, fontSize:p.bold?19:17, color:p.highlight?'2971EB':'373838', bold:p.bold||false, fontFace:'Microsoft YaHei', paraSpaceAfter:14 } }));
   if (items.length) s.addText(items, { x:txtX, y:cY+0.2, w:5.8, h:5.05, valign:'top' });
   addFooter(s, pageNum, false);
 }
@@ -380,13 +382,13 @@ function addTimelineSlide(pres, A, { title, subtitle, milestones }, pageNum) {
   addLogo(s, A, false);
   addContentTitle(s, title, subtitle);
   const n = milestones.length, lineY=3.8, sX=0.80, span=11.5;
-  s.addShape(pres.ShapeType.line, { x:sX, y:lineY, w:span, h:0, line:{ color:'1770EA', width:2 } });
+  s.addShape(pres.ShapeType.line, { x:sX, y:lineY, w:span, h:0, line:{ color:'2971EB', width:2 } });
   milestones.forEach((m, i) => {
     const x = sX + (span/(n-1||1))*i;
-    s.addShape(pres.ShapeType.oval, { x:x-0.13, y:lineY-0.13, w:0.26, h:0.26, fill:{ color:'1770EA' } });
+    s.addShape(pres.ShapeType.oval, { x:x-0.13, y:lineY-0.13, w:0.26, h:0.26, fill:{ color:'2971EB' } });
     const isUp = i%2===0;
-    s.addText(m.date, { x:x-0.9, y:isUp?lineY-1.2:lineY+0.2, w:1.8, h:0.3, fontSize:13, color:'1770EA', bold:true, fontFace:'Microsoft YaHei', align:'center', margin:0 });
-    s.addText(m.event, { x:x-0.9, y:isUp?lineY-0.85:lineY+0.55, w:1.8, h:0.55, fontSize:13, color:'262626', bold:true, fontFace:'Microsoft YaHei', align:'center', margin:0 });
+    s.addText(m.date, { x:x-0.9, y:isUp?lineY-1.2:lineY+0.2, w:1.8, h:0.3, fontSize:13, color:'2971EB', bold:true, fontFace:'Microsoft YaHei', align:'center', margin:0 });
+    s.addText(m.event, { x:x-0.9, y:isUp?lineY-0.85:lineY+0.55, w:1.8, h:0.55, fontSize:13, color:'373838', bold:true, fontFace:'Microsoft YaHei', align:'center', margin:0 });
     if (m.detail) s.addText(m.detail, { x:x-0.9, y:isUp?lineY+0.2:lineY-0.85, w:1.8, h:0.5, fontSize:11, color:'666666', fontFace:'Microsoft YaHei', align:'center', margin:0 });
   });
   addFooter(s, pageNum, false);
@@ -402,8 +404,8 @@ function addClosingSlide(pres, A, pageNum) {
   const s = pres.addSlide();
   s.addImage({ data:A.BG_CLOSING, x:0, y:0, w:13.333, h:7.509 });
   s.addImage({ data:A.CLOSING_THANKS, x:0.794, y:2.802, w:7.562, h:2.735 });
-  s.addText('版权所有 © 金蝶国际软件集团有限公司   始创于 1993', { x:1.095, y:6.961, w:2.965, h:0.188, fontSize:8, color:'AACCDD', fontFace:'Microsoft YaHei', margin:0 });
-  s.addText('④ 内部公开 请勿外传', { x:3.825, y:6.867, w:1.599, h:0.190, fontSize:8, color:'AACCDD', fontFace:'Microsoft YaHei', margin:0 });
+  s.addText('版权所有 © 金蝶国际软件集团有限公司   始创于 1993', { x:1.095, y:6.961, w:2.965, h:0.188, fontSize:8, color:'BFBFBF', fontFace:'Microsoft YaHei', margin:0 });
+  s.addText('④ 内部公开 请勿外传', { x:3.825, y:6.867, w:1.599, h:0.190, fontSize:8, color:'BFBFBF', fontFace:'Microsoft YaHei', margin:0 });
   addFooter(s, pageNum, true);
 }
 ```
@@ -439,7 +441,7 @@ function addMetricDashboard(pres, A, { title, subtitle, metrics }, pageNum) {
   const cH      = 5.20;
   const cY      = 1.55;
   const sX      = 0.434;
-  const colors  = ['1770EA', '005392', '00CBFF'];
+  const colors  = ['2971EB', '28245F', '22AAFE'];
 
   metrics.slice(0, n).forEach((m, i) => {
     const x    = sX + i * (cW + 0.28);
@@ -447,10 +449,10 @@ function addMetricDashboard(pres, A, { title, subtitle, metrics }, pageNum) {
     const isMain = i === 0; // 第一张卡为主卡（深蓝底）
 
     // 卡片底色
-    s.addShape(pres.ShapeType.rect, {
+    s.addShape(pres.ShapeType.roundRect, {
       x, y: cY, w: cW, h: cH,
-      fill: { color: isMain ? '1770EA' : 'F5F7FA' },
-      shadow: mkShS(),
+      fill: { color: isMain ? '2971EB' : 'E7F1FF' },
+      rectRadius: 0.15, shadow: mkShS(),
     });
 
     // 顶部渐变强调条（同色透明度）
@@ -463,7 +465,7 @@ function addMetricDashboard(pres, A, { title, subtitle, metrics }, pageNum) {
     s.addText(m.label || '', {
       x: x + 0.20, y: cY + 0.22, w: cW - 0.40, h: 0.38,
       fontSize: 14, bold: false,
-      color: isMain ? 'D0E8FF' : '888888',
+      color: isMain ? 'E7F1FF' : 'BFBFBF',
       fontFace: 'Microsoft YaHei', margin: 0,
     });
 
@@ -482,7 +484,7 @@ function addMetricDashboard(pres, A, { title, subtitle, metrics }, pageNum) {
       s.addText(m.sub, {
         x: x + 0.20, y: cY + 2.40, w: cW - 0.40, h: 0.40,
         fontSize: 14, bold: true,
-        color: isMain ? '00CCFE' : '1770EA',
+        color: isMain ? '00CCFE' : '2971EB',
         fontFace: 'Microsoft YaHei', margin: 0,
       });
     }
@@ -513,7 +515,7 @@ function addMetricDashboard(pres, A, { title, subtitle, metrics }, pageNum) {
           y: chartY + chartH - val * chartH - 0.055,
           w: 0.11, h: 0.11,
           fill: { color: lineColor },
-          line: { color: isMain ? '1770EA' : 'FFFFFF', width: 1 },
+          line: { color: isMain ? '2971EB' : 'FFFFFF', width: 1 },
         });
       });
     }
@@ -566,7 +568,7 @@ function addBentoGrid(pres, A, { title, subtitle, cards }, pageNum) {
   const primary = cards[0] || {};
   bentoCard(pres, s, {
     x: sX, y: sY, w: primaryW, h: totalH,
-    fillColor: '1770EA',
+    fillColor: '2971EB',
     title: primary.title || '',
     body:  primary.body  || '',
     bigNumber: primary.bigNumber || '',
@@ -580,7 +582,7 @@ function addBentoGrid(pres, A, { title, subtitle, cards }, pageNum) {
     const row = Math.floor(i / 2);
     const cx  = sX + primaryW + GAP + col * (secColW + GAP);
     const cy  = sY + row * (secRowH + GAP);
-    const fillOptions = ['F5F7FA', 'EBF3FF', 'F5F7FA', 'EBF3FF'];
+    const fillOptions = ['E7F1FF', 'E7F1FF', 'E7F1FF', 'E7F1FF'];
     bentoCard(pres, s, {
       x: cx, y: cy, w: secColW, h: secRowH,
       fillColor: c.fillColor || fillOptions[i],
@@ -604,9 +606,9 @@ function addBentoGrid(pres, A, { title, subtitle, cards }, pageNum) {
 /**
  * 三层横向架构图
  * layers: [
- *   { label:'SaaS 层', color:'1770EA', items:['应用A','应用B','应用C','应用D'] },
- *   { label:'PaaS 层', color:'005392', items:['Cangqiong苍穹','Skill市场','Agent平台'] },
- *   { label:'IaaS 层', color:'00C7C7', items:['华为云','阿里云','腾讯云'] },
+ *   { label:'SaaS 层', color:'2971EB', items:['应用A','应用B','应用C','应用D'] },
+ *   { label:'PaaS 层', color:'28245F', items:['Cangqiong苍穹','Skill市场','Agent平台'] },
+ *   { label:'IaaS 层', color:'05C8C8', items:['华为云','阿里云','腾讯云'] },
  * ]
  * bottomNote: 底部说明文字（可选）
  */
@@ -653,13 +655,13 @@ function addArchSlide(pres, A, { title, subtitle, layers, bottomNote }, pageNum)
       const ix = contentX + j * (itemW + 0.10);
       s.addShape(pres.ShapeType.rect, {
         x: ix, y: ly, w: itemW, h: layerH,
-        fill: { color: i === 0 ? 'EBF3FF' : 'F5F7FA' },
-        line: { type: 'none' },
+        fill: { color: i === 0 ? 'E7F1FF' : 'E7F1FF' },
+        line: { color: col, width: 0.5 },
         shadow: mkShS(),
       });
       s.addText(item, {
         x: ix, y: ly, w: itemW, h: layerH,
-        fontSize: 13, color: i === 0 ? col : '333333',
+        fontSize: 13, color: i === 0 ? col : '373838',
         bold: i === 0,
         fontFace: 'Microsoft YaHei',
         align: 'center', valign: 'middle', margin: 2,
@@ -671,7 +673,7 @@ function addArchSlide(pres, A, { title, subtitle, layers, bottomNote }, pageNum)
     s.addText(bottomNote, {
       x: sX, y: sY + n * (layerH + GAP) - GAP + 0.18,
       w: totalW, h: 0.35,
-      fontSize: 12, color: '888888',
+      fontSize: 12, color: 'BFBFBF',
       fontFace: 'Microsoft YaHei', margin: 0,
     });
   }
@@ -690,10 +692,10 @@ function addArchSlide(pres, A, { title, subtitle, layers, bottomNote }, pageNum)
 /**
  * 3 或 4 列等宽特性卡片，顶部圆形图标区
  * features: [
- *   { icon:'📊', title:'数据洞察', body:'实时分析 + 趋势预测', color:'1770EA' },
- *   { icon:'⚡', title:'极速响应', body:'毫秒级处理，零感知等待', color:'00CBFF' },
- *   { icon:'🔒', title:'安全合规', body:'等保三级，数据主权可控', color:'00C7C7' },
- *   { icon:'🌐', title:'生态开放', body:'200+ ISV 认证合作', color:'AF6EFF' },
+ *   { icon:'📊', title:'数据洞察', body:'实时分析 + 趋势预测', color:'2971EB' },
+ *   { icon:'⚡', title:'极速响应', body:'毫秒级处理，零感知等待', color:'22AAFE' },
+ *   { icon:'🔒', title:'安全合规', body:'等保三级，数据主权可控', color:'05C8C8' },
+ *   { icon:'🌐', title:'生态开放', body:'200+ ISV 认证合作', color:'966EFF' },
  * ]
  */
 function addFeatureCardSlide(pres, A, { title, subtitle, features }, pageNum) {
@@ -713,9 +715,9 @@ function addFeatureCardSlide(pres, A, { title, subtitle, features }, pageNum) {
     const col = f.color || COLOR_SEQ[i];
 
     // 卡片
-    s.addShape(pres.ShapeType.rect, {
+    s.addShape(pres.ShapeType.roundRect, {
       x, y: sY, w: cW, h: cH,
-      fill: { color: 'F5F7FA' }, shadow: mkShS(),
+      fill: { color: 'E7F1FF' }, rectRadius: 0.15, shadow: mkShS(),
     });
 
     // 顶部彩色图标圆（圆心在卡片顶部）
@@ -740,7 +742,7 @@ function addFeatureCardSlide(pres, A, { title, subtitle, features }, pageNum) {
     // 标题
     s.addText(f.title || '', {
       x: x + 0.14, y: sY + 1.18, w: cW - 0.28, h: 0.52,
-      fontSize: 16, bold: true, color: '262626',
+      fontSize: 18, bold: true, color: '373838',
       fontFace: 'Microsoft YaHei', align: 'center', valign: 'middle', margin: 0,
     });
 
@@ -755,7 +757,7 @@ function addFeatureCardSlide(pres, A, { title, subtitle, features }, pageNum) {
     if (f.body) {
       s.addText(f.body, {
         x: x + 0.14, y: sY + 1.92, w: cW - 0.28, h: 3.0,
-        fontSize: 13, color: '555555',
+        fontSize: 13, color: '373838',
         fontFace: 'Microsoft YaHei', align: 'center', valign: 'top', margin: 0, wrap: true,
       });
     }
@@ -806,7 +808,7 @@ function addMatrixSlide(pres, A, { title, subtitle, matrix }, pageNum) {
   // 表头
   headers.forEach((h, j) => {
     const cx = sX + labelW + 0.12 + j * (colW + 0.12);
-    s.addShape(pres.ShapeType.rect, { x:cx, y:sY, w:colW, h:headerH, fill:{ color: j===0 ? '1770EA' : '005392' } });
+    s.addShape(pres.ShapeType.rect, { x:cx, y:sY, w:colW, h:headerH, fill:{ color: j===0 ? '2971EB' : '28245F' } });
     s.addText(h, { x:cx, y:sY, w:colW, h:headerH, fontSize:14, bold:true, color:'FFFFFF', fontFace:'Microsoft YaHei', align:'center', valign:'middle', margin:0 });
   });
 
@@ -816,14 +818,14 @@ function addMatrixSlide(pres, A, { title, subtitle, matrix }, pageNum) {
     const isEven = i % 2 === 0;
 
     // 标签列
-    s.addShape(pres.ShapeType.rect, { x:sX, y:ry, w:labelW, h:rowH, fill:{ color: isEven ? '1770EA' : '005392' } });
+    s.addShape(pres.ShapeType.rect, { x:sX, y:ry, w:labelW, h:rowH, fill:{ color: isEven ? '2971EB' : '28245F' } });
     s.addText(row.label || '', { x:sX, y:ry, w:labelW, h:rowH, fontSize:13, bold:true, color:'FFFFFF', fontFace:'Microsoft YaHei', align:'center', valign:'middle', margin:4 });
 
     // 内容格
     (row.values || []).slice(0, nCols).forEach((val, j) => {
       const cx = sX + labelW + 0.12 + j * (colW + 0.12);
-      s.addShape(pres.ShapeType.rect, { x:cx, y:ry, w:colW, h:rowH, fill:{ color: isEven ? 'F5F7FA' : 'EBF3FF' }, line:{ type:'none' }, shadow: mkShS() });
-      s.addText(val, { x:cx+0.12, y:ry, w:colW-0.24, h:rowH, fontSize:13, color: j===1 ? '1770EA' : '333333', bold: j===1, fontFace:'Microsoft YaHei', valign:'middle', margin:0, wrap:true });
+      s.addShape(pres.ShapeType.rect, { x:cx, y:ry, w:colW, h:rowH, fill:{ color: isEven ? 'E7F1FF' : 'E7F1FF' }, line:{ color:'BFBFBF', width:0.5 } });
+      s.addText(val, { x:cx+0.12, y:ry, w:colW-0.24, h:rowH, fontSize:13, color: j===1 ? '2971EB' : '373838', bold: j===1, fontFace:'Microsoft YaHei', valign:'middle', margin:0, wrap:true });
     });
   });
 
@@ -853,7 +855,7 @@ function addQuoteSlide(pres, A, { title, quote, source, size }, pageNum) {
   if (title) {
     s.addText(title, {
       x: 0.435, y: 0.230, w: 10.601, h: 0.513,
-      fontSize: 18, color: 'AAAAAA', bold: false,
+      fontSize: 18, color: 'BFBFBF', bold: false,
       fontFace: 'Microsoft YaHei', margin: 0, valign: 'middle',
     });
   }
@@ -861,7 +863,7 @@ function addQuoteSlide(pres, A, { title, quote, source, size }, pageNum) {
   // 左上角装饰线
   s.addShape(pres.ShapeType.line, {
     x: 0.80, y: 1.80, w: 0, h: 2.20,
-    line: { color: '1770EA', width: 3 },
+    line: { color: '2971EB', width: 3 },
   });
 
   // 金句文字
@@ -869,7 +871,7 @@ function addQuoteSlide(pres, A, { title, quote, source, size }, pageNum) {
   const fs = fsMap[size || 'large'] || 36;
   s.addText(quote || '', {
     x: 1.30, y: 1.80, w: 10.50, h: 3.20,
-    fontSize: fs, color: '262626', bold: false,
+    fontSize: fs, color: '373838', bold: false,
     fontFace: 'Microsoft YaHei',
     valign: 'middle', margin: 0, wrap: true,
     lineSpacingMultiple: 1.4,
@@ -879,7 +881,7 @@ function addQuoteSlide(pres, A, { title, quote, source, size }, pageNum) {
   if (source) {
     s.addText(`— ${source}`, {
       x: 1.30, y: 5.30, w: 10.50, h: 0.40,
-      fontSize: 14, color: '888888', bold: false,
+      fontSize: 14, color: 'BFBFBF', bold: false,
       fontFace: 'Microsoft YaHei', margin: 0,
     });
   }
@@ -915,22 +917,22 @@ function addImmersiveSlide(pres, A, { title, imgData, placeholder, points }, pag
       sizing: { type: 'cover', w: imgW, h: imgH },
     });
   } else {
-    s.addShape(pres.ShapeType.rect, { x:0, y:0, w:imgW, h:imgH, fill:{ color:'EBF3FF' }, line:{ color:'1770EA', width:1, dashType:'dash' } });
-    if (placeholder) s.addText(placeholder, { x:0, y:imgH/2-0.3, w:imgW, h:0.6, fontSize:14, color:'1770EA', align:'center', italic:true, fontFace:'Microsoft YaHei', margin:0 });
+    s.addShape(pres.ShapeType.rect, { x:0, y:0, w:imgW, h:imgH, fill:{ color:'E7F1FF' }, line:{ color:'2971EB', width:1, dashType:'dash' } });
+    if (placeholder) s.addText(placeholder, { x:0, y:imgH/2-0.3, w:imgW, h:0.6, fontSize:14, color:'2971EB', align:'center', italic:true, fontFace:'Microsoft YaHei', margin:0 });
   }
 
   // 右侧文字区
   // 标题
   s.addText(title || '', {
     x: txtX, y: 0.80, w: txtW, h: 0.80,
-    fontSize: 22, bold: true, color: '262626',
+    fontSize: 22, bold: true, color: '373838',
     fontFace: 'Microsoft YaHei', valign: 'middle', margin: 0,
   });
 
   // 蓝色细线
   s.addShape(pres.ShapeType.line, {
     x: txtX, y: 1.72, w: 2.40, h: 0,
-    line: { color: '1770EA', width: 2 },
+    line: { color: '2971EB', width: 2 },
   });
 
   // 要点
@@ -939,8 +941,8 @@ function addImmersiveSlide(pres, A, { title, imgData, placeholder, points }, pag
     options: {
       bullet: true,
       breakLine: i < points.length - 1,
-      fontSize: p.bold ? 18 : 16,
-      color: p.highlight ? '1770EA' : '333333',
+      fontSize: p.bold ? 16 : 14,
+      color: p.highlight ? '2971EB' : '373838',
       bold: p.bold || false,
       fontFace: 'Microsoft YaHei',
       paraSpaceAfter: 16,
@@ -971,14 +973,14 @@ function addImmersiveSlide(pres, A, { title, imgData, placeholder, points }, pag
  *
  * hero:    { number, label }  超大主视觉（如 { number: '8.4B', label: '生态总GMV' }）
  * points:  [{ text, bold }]   右侧要点（最多 4 条，每条 ≤ 15 字）
- * accentColor: 主题色，默认 '1770EA'
+ * accentColor: 主题色，默认 '2971EB'
  */
 function addHeroSlide(pres, A, { title, hero, points, accentColor }, pageNum) {
   const s = pres.addSlide();
   s.background = { color: 'FFFFFF' };
   addLogo(s, A, false);
 
-  const col  = accentColor || '1770EA';
+  const col  = accentColor || '2971EB';
   const splitX = 7.20;
 
   // 左侧渐变色块（同色透明度渐变：深 → 浅）
@@ -1011,7 +1013,7 @@ function addHeroSlide(pres, A, { title, hero, points, accentColor }, pageNum) {
   if (hero && hero.label) {
     s.addText(hero.label, {
       x: 0.40, y: 4.50, w: splitX - 0.60, h: 0.60,
-      fontSize: 20, bold: false, color: 'D0E8FF',
+      fontSize: 20, bold: false, color: 'E7F1FF',
       fontFace: 'Microsoft YaHei', valign: 'middle', margin: 0,
     });
   }
@@ -1036,8 +1038,8 @@ function addHeroSlide(pres, A, { title, hero, points, accentColor }, pageNum) {
     options: {
       bullet: false,
       breakLine: i < points.length - 1,
-      fontSize: p.bold ? 18 : 16,
-      color: p.bold ? col : '333333',
+      fontSize: p.bold ? 16 : 14,
+      color: p.bold ? col : '373838',
       bold: p.bold || false,
       fontFace: 'Microsoft YaHei',
       paraSpaceAfter: 22,
@@ -1088,7 +1090,7 @@ function addPyramidSlide(pres, A, data, pageNum) {
   const topH = 0.72;
   s.addShape(pres.ShapeType.rect, {
     x: GX, y: GY, w: GW, h: topH,
-    fill: { color: '1770EA' }, line: { type: 'none' }, shadow: mkSh(),
+    fill: { color: '2971EB' }, line: { type: 'none' }, shadow: mkSh(),
   });
   s.addText(conclusion || '核心结论', {
     x: GX + 0.28, y: GY, w: GW - 0.56, h: topH,
@@ -1108,11 +1110,11 @@ function addPyramidSlide(pres, A, data, pageNum) {
     const cx = GX + i * (colW + GAP);
     s.addShape(pres.ShapeType.rect, {
       x: cx, y: midY, w: colW, h: midH,
-      fill: { color: 'FFB800' }, line: { type: 'none' }, shadow: mkShS(),
+      fill: { color: 'FFB61A' }, line: { type: 'none' }, shadow: mkShS(),
     });
     s.addText(pillar.label || `分论点 ${i + 1}`, {
       x: cx + 0.15, y: midY, w: colW - 0.30, h: midH,
-      fontSize: 16, bold: true, color: '1A1A3E',
+      fontSize: 16, bold: true, color: '28245F',
       fontFace: 'Microsoft YaHei', valign: 'middle', align: 'center',
     });
   });
@@ -1125,7 +1127,7 @@ function addPyramidSlide(pres, A, data, pageNum) {
     const cx = GX + i * (colW + GAP);
     s.addShape(pres.ShapeType.rect, {
       x: cx, y: botY, w: colW, h: botH,
-      fill: { color: 'EEF2FF' }, line: { type: 'none' }, shadow: mkShS(),
+      fill: { color: 'E7F1FF' }, rectRadius: 0.12, line: { type: 'none' }, shadow: mkShS(),
     });
     const pts = (pillar.points || []).slice(0, 4);
     if (pts.length) {
@@ -1133,9 +1135,9 @@ function addPyramidSlide(pres, A, data, pageNum) {
         text: pt,
         options: {
           breakLine: j < pts.length - 1,
-          fontSize: 13, color: '333355',
+          fontSize: 13, color: '373838',
           fontFace: 'Microsoft YaHei', paraSpaceAfter: 14,
-          bullet: { type: 'char', code: '25CF', color: '1770EA', size: 60 },
+          bullet: { type: 'char', code: '25CF', color: '2971EB', size: 60 },
         },
       }));
       s.addText(items, {
@@ -1182,10 +1184,10 @@ function addPDCASlide(pres, A, data, pageNum) {
   const cH = (GH - GAP) / 2;
 
   const CELLS = [
-    { key: 'P', label: 'P  计划 Plan',  color: '1770EA', fg: 'FFFFFF', data: pdca.P },
-    { key: 'D', label: 'D  执行 Do',    color: '00CBFF', fg: 'FFFFFF', data: pdca.D },
-    { key: 'A', label: 'A  改进 Act',   color: '8B6FE8', fg: 'FFFFFF', data: pdca.A },
-    { key: 'C', label: 'C  检查 Check', color: 'FFB800', fg: '1A1A3E', data: pdca.C },
+    { key: 'P', label: 'P  计划 Plan',  color: '2971EB', fg: 'FFFFFF', data: pdca.P },
+    { key: 'D', label: 'D  执行 Do',    color: '22AAFE', fg: 'FFFFFF', data: pdca.D },
+    { key: 'A', label: 'A  改进 Act',   color: '966EFF', fg: 'FFFFFF', data: pdca.A },
+    { key: 'C', label: 'C  检查 Check', color: 'FFB61A', fg: '28245F', data: pdca.C },
   ];
   const COORDS = [[0,0],[1,0],[0,1],[1,1]]; // P左上·D右上·A左下·C右下
 
@@ -1203,13 +1205,13 @@ function addPDCASlide(pres, A, data, pageNum) {
       x: cx + 0.20, y: cy + 0.12, w: 0.70, h: 0.85,
       fontSize: 56, bold: true, color: 'FFFFFF',
       fontFace: 'Microsoft YaHei', valign: 'middle',
-      transparency: cell.fg === '1A1A3E' ? 30 : 20,
+      transparency: cell.fg === '28245F' ? 30 : 20,
     });
     // 标题
     s.addText(cell.label, {
       x: cx + 0.95, y: cy + 0.22, w: cW - 1.10, h: 0.46,
       fontSize: 15, bold: true,
-      color: cell.fg === '1A1A3E' ? '1A1A3E' : 'FFFFFF',
+      color: cell.fg === '28245F' ? '28245F' : 'FFFFFF',
       fontFace: 'Microsoft YaHei', valign: 'middle',
     });
     // 要点
@@ -1220,10 +1222,10 @@ function addPDCASlide(pres, A, data, pageNum) {
         options: {
           breakLine: j < pts.length - 1,
           fontSize: 13,
-          color: cell.fg === '1A1A3E' ? '2A2A2A' : 'DDEEFF',
+          color: cell.fg === '28245F' ? '2A2A2A' : 'E7F1FF',
           fontFace: 'Microsoft YaHei', paraSpaceAfter: 12,
           bullet: { type: 'char', code: '25B8',
-            color: cell.fg === '1A1A3E' ? '1A1A3E' : 'FFFFFF', size: 70 },
+            color: cell.fg === '28245F' ? '28245F' : 'FFFFFF', size: 70 },
         },
       }));
       s.addText(items, {
@@ -1238,11 +1240,11 @@ function addPDCASlide(pres, A, data, pageNum) {
   const oy = GY + cH + GAP / 2 - 0.32;
   s.addShape(pres.ShapeType.ellipse, {
     x: ox, y: oy, w: 0.64, h: 0.64,
-    fill: { color: 'FFFFFF' }, line: { color: 'C0D0F0', pt: 2 }, shadow: mkSh(),
+    fill: { color: 'FFFFFF' }, line: { color: 'BFBFBF', pt: 2 }, shadow: mkSh(),
   });
   s.addText('↻', {
     x: ox, y: oy, w: 0.64, h: 0.64,
-    fontSize: 22, color: '1770EA', align: 'center', valign: 'middle',
+    fontSize: 22, color: '2971EB', align: 'center', valign: 'middle',
     fontFace: 'Microsoft YaHei',
   });
 }
@@ -1283,10 +1285,10 @@ function addSWOTSlide(pres, A, data, pageNum) {
   const cH = (GH - GAP) / 2;
 
   const CELLS = [
-    { key: 'S', label: 'S  优势 Strengths',    headerColor: '1770EA', headerFg: 'FFFFFF', bodyColor: 'EEF4FF', data: swot.S },
-    { key: 'O', label: 'O  机会 Opportunities', headerColor: '00C4A7', headerFg: 'FFFFFF', bodyColor: 'EDFAF7', data: swot.O },
-    { key: 'W', label: 'W  劣势 Weaknesses',    headerColor: 'EEF2FF', headerFg: '333355', bodyColor: 'F8F8FF', data: swot.W },
-    { key: 'T', label: 'T  威胁 Threats',       headerColor: '8B6FE8', headerFg: 'FFFFFF', bodyColor: 'F3F0FF', data: swot.T },
+    { key: 'S', label: 'S  优势 Strengths',    headerColor: '2971EB', headerFg: 'FFFFFF', bodyColor: 'E7F1FF', data: swot.S },
+    { key: 'O', label: 'O  机会 Opportunities', headerColor: '05C8C8', headerFg: 'FFFFFF', bodyColor: 'E7F1FF', data: swot.O },
+    { key: 'W', label: 'W  劣势 Weaknesses',    headerColor: 'E7F1FF', headerFg: '373838', bodyColor: 'E7F1FF', data: swot.W },
+    { key: 'T', label: 'T  威胁 Threats',       headerColor: '966EFF', headerFg: 'FFFFFF', bodyColor: 'E7F1FF', data: swot.T },
   ];
   const COORDS = [[0,0],[1,0],[0,1],[1,1]];
 
@@ -1307,17 +1309,17 @@ function addSWOTSlide(pres, A, data, pageNum) {
     });
     s.addShape(pres.ShapeType.rect, {
       x: cx, y: cy + hH, w: cW, h: cH - hH,
-      fill: { color: cell.bodyColor }, line: { color: 'DCE8F5', pt: 0.8 }, shadow: mkShS(),
+      fill: { color: cell.bodyColor }, rectRadius: 0.12, line: { type: 'none' }, shadow: mkShS(),
     });
 
     const pts = ((cell.data && cell.data.points) || []).slice(0, 4);
     if (pts.length) {
-      const dotColor = cell.headerColor === 'EEF2FF' ? '1770EA' : cell.headerColor;
+      const dotColor = cell.headerColor === 'E7F1FF' ? '2971EB' : cell.headerColor;
       const items = pts.map((pt, j) => ({
         text: pt,
         options: {
           breakLine: j < pts.length - 1,
-          fontSize: 13, color: '333355',
+          fontSize: 13, color: '373838',
           fontFace: 'Microsoft YaHei', paraSpaceAfter: 14,
           bullet: { type: 'char', code: '25CF', color: dotColor, size: 55 },
         },
@@ -1333,11 +1335,11 @@ function addSWOTSlide(pres, A, data, pageNum) {
   const axisY = GY - 0.32;
   [{ t:'内部因素', x: GX + cW/2 - 0.8 }, { t:'外部因素', x: GX + cW + GAP + cW/2 - 0.8 }].forEach(ax => {
     s.addText(ax.t, { x: ax.x, y: axisY, w: 1.60, h: 0.28,
-      fontSize: 11, color: '888888', fontFace: 'Microsoft YaHei', align: 'center' });
+      fontSize: 11, color: 'BFBFBF', fontFace: 'Microsoft YaHei', align: 'center' });
   });
   [{ t:'正面', y: GY + cH/2 - 0.12 }, { t:'负面', y: GY + cH + GAP + cH/2 - 0.12 }].forEach(ax => {
     s.addText(ax.t, { x: GX - 0.36, y: ax.y, w: 0.28, h: 0.28,
-      fontSize: 11, color: '888888', fontFace: 'Microsoft YaHei', align: 'center', valign: 'middle' });
+      fontSize: 11, color: 'BFBFBF', fontFace: 'Microsoft YaHei', align: 'center', valign: 'middle' });
   });
 }
 ```
@@ -1378,17 +1380,17 @@ function addGoldenCircleSlide(pres, A, data, pageNum) {
   // WHAT 外环
   s.addShape(pres.ShapeType.ellipse, {
     x: cx - 2.80, y: cy - 2.30, w: 5.60, h: 4.60,
-    fill: { color: 'EEF2FF' }, line: { color: 'C8D8F8', pt: 1.5 }, shadow: mkSh(),
+    fill: { color: 'E7F1FF' }, line: { color: 'C8D8F8', pt: 1.5 }, shadow: mkSh(),
   });
   // HOW 中环
   s.addShape(pres.ShapeType.ellipse, {
     x: cx - 1.80, y: cy - 1.48, w: 3.60, h: 2.96,
-    fill: { color: '00CBFF' }, line: { type: 'none' }, shadow: mkShS(),
+    fill: { color: '22AAFE' }, line: { type: 'none' }, shadow: mkShS(),
   });
   // WHY 内核
   s.addShape(pres.ShapeType.ellipse, {
     x: cx - 0.90, y: cy - 0.74, w: 1.80, h: 1.48,
-    fill: { color: '1770EA' }, line: { type: 'none' }, shadow: mkShS(),
+    fill: { color: '2971EB' }, line: { type: 'none' }, shadow: mkShS(),
   });
 
   s.addText('WHY',  { x: cx-0.72, y: cy-0.28, w: 1.44, h: 0.56,
@@ -1401,8 +1403,8 @@ function addGoldenCircleSlide(pres, A, data, pageNum) {
   // 右侧说明卡
   const RX = 7.00, RW = 5.60, rowH = 1.60, rowGap = 0.14, startY = 1.65;
   const rows = [
-    { label: 'WHY — 为什么', color: '1770EA', body: why.body },
-    { label: 'HOW — 怎么做', color: '00CBFF', body: how.body },
+    { label: 'WHY — 为什么', color: '2971EB', body: why.body },
+    { label: 'HOW — 怎么做', color: '22AAFE', body: how.body },
     { label: 'WHAT — 做什么', color: 'C0CCDD', textColor: '555566', body: what.body },
   ];
   rows.forEach((row, i) => {
@@ -1410,13 +1412,13 @@ function addGoldenCircleSlide(pres, A, data, pageNum) {
     s.addShape(pres.ShapeType.rect, { x: RX, y: ry, w: 0.10, h: rowH,
       fill: { color: row.color }, line: { type: 'none' } });
     s.addShape(pres.ShapeType.rect, { x: RX+0.10, y: ry, w: RW-0.10, h: rowH,
-      fill: { color: 'F8FAFF' }, line: { color: 'DCE8F5', pt: 0.8 }, shadow: mkShS() });
+      fill: { color: 'E7F1FF' }, rectRadius: 0.12, line: { type: 'none' }, shadow: mkShS() });
     s.addText(row.label, { x: RX+0.28, y: ry+0.12, w: RW-0.44, h: 0.38,
       fontSize: 14, bold: true, color: row.textColor || row.color,
       fontFace: 'Microsoft YaHei', valign: 'middle' });
     if (row.body) {
       s.addText(row.body, { x: RX+0.28, y: ry+0.54, w: RW-0.44, h: rowH-0.66,
-        fontSize: 13, color: '444455',
+        fontSize: 13, color: '373838',
         fontFace: 'Microsoft YaHei', valign: 'top', lineSpacingMultiple: 1.35 });
     }
   });
@@ -1472,9 +1474,9 @@ function addFiveW1HSlide(pres, A, data, pageNum) {
     const src = items.find(it => it.key === def.key) || {};
 
     s.addShape(pres.ShapeType.rect, { x: cx, y: cy, w: cW, h: cH,
-      fill: { color: 'F5F8FF' }, line: { type: 'none' }, shadow: mkShS() });
+      fill: { color: 'E7F1FF' }, rectRadius: 0.12, line: { type: 'none' }, shadow: mkShS() });
     s.addShape(pres.ShapeType.rect, { x: cx, y: cy, w: cW, h: hH,
-      fill: { color: '1770EA' }, line: { type: 'none' } });
+      fill: { color: '2971EB' }, line: { type: 'none' } });
     s.addText(`${def.key}  ${src.label || def.label}`, {
       x: cx+0.15, y: cy, w: cW-0.30, h: hH,
       fontSize: 14, bold: true, color: 'FFFFFF',
@@ -1486,9 +1488,9 @@ function addFiveW1HSlide(pres, A, data, pageNum) {
         text: pt,
         options: {
           breakLine: j < pts.length - 1,
-          fontSize: 13, color: '333355',
+          fontSize: 13, color: '373838',
           fontFace: 'Microsoft YaHei', paraSpaceAfter: 14,
-          bullet: { type: 'char', code: '25CF', color: '1770EA', size: 55 },
+          bullet: { type: 'char', code: '25CF', color: '2971EB', size: 55 },
         },
       }));
       s.addText(txtItems, { x: cx+0.18, y: cy+hH+0.14, w: cW-0.34, h: cH-hH-0.22,
@@ -1533,10 +1535,10 @@ function addSCQASlide(pres, A, data, pageNum) {
   const hH = 0.60;
 
   const STEPS = [
-    { key:'S', label:'情境 Situation',   color:'EEF2FF', headerFg:'333355', data: scqa.S },
-    { key:'C', label:'冲突 Complication', color:'FFB800', headerFg:'1A1A3E', data: scqa.C },
-    { key:'Q', label:'疑问 Question',     color:'8B6FE8', headerFg:'FFFFFF', data: scqa.Q },
-    { key:'A', label:'解答 Answer',       color:'1770EA', headerFg:'FFFFFF', data: scqa.A },
+    { key:'S', label:'情境 Situation',   color:'E7F1FF', headerFg:'373838', data: scqa.S },
+    { key:'C', label:'冲突 Complication', color:'FFB61A', headerFg:'28245F', data: scqa.C },
+    { key:'Q', label:'疑问 Question',     color:'966EFF', headerFg:'FFFFFF', data: scqa.Q },
+    { key:'A', label:'解答 Answer',       color:'2971EB', headerFg:'FFFFFF', data: scqa.A },
   ];
 
   STEPS.forEach((step, i) => {
@@ -1552,11 +1554,11 @@ function addSCQASlide(pres, A, data, pageNum) {
     if (i < 3) {
       s.addShape(pres.ShapeType.rect, {
         x: cx+cW+0.01, y: GY+hH/2-0.02, w: GAP-0.02, h: 0.04,
-        fill: { color: 'C0D0F0' }, line: { type: 'none' } });
+        fill: { color: 'BFBFBF' }, line: { type: 'none' } });
     }
 
     s.addShape(pres.ShapeType.rect, { x: cx, y: GY+hH, w: cW, h: GH-hH,
-      fill: { color: 'F8FAFF' }, line: { color: 'D8E8F5', pt: 0.8 }, shadow: mkShS() });
+      fill: { color: 'E7F1FF' }, rectRadius: 0.12, line: { type: 'none' }, shadow: mkShS() });
 
     // 大号字母水印
     s.addText(step.key, { x: cx+cW-1.00, y: GY+hH+0.05, w: 0.90, h: 1.10,
@@ -1566,12 +1568,12 @@ function addSCQASlide(pres, A, data, pageNum) {
     const d = step.data || {};
     if (d.headline) {
       s.addText(d.headline, { x: cx+0.18, y: GY+hH+0.18, w: cW-0.34, h: 0.50,
-        fontSize: 14, bold: true, color: '1A2A4A',
+        fontSize: 14, bold: true, color: '373838',
         fontFace: 'Microsoft YaHei', valign: 'middle' });
     }
     if (d.body) {
       s.addText(d.body, { x: cx+0.18, y: GY+hH+0.74, w: cW-0.34, h: GH-hH-0.90,
-        fontSize: 12.5, color: '444455',
+        fontSize: 12.5, color: '373838',
         fontFace: 'Microsoft YaHei', valign: 'top', lineSpacingMultiple: 1.40 });
     }
   });
@@ -1614,11 +1616,11 @@ function addIPDFiveViewSlide(pres, A, data, pageNum) {
   const hH = 0.80;
 
   const DEFAULTS = [
-    { num:'01', label:'看行业', color:'1770EA' },
-    { num:'02', label:'看客户', color:'00CBFF' },
-    { num:'03', label:'看机会', color:'00C4A7' },
-    { num:'04', label:'看竞争', color:'8B6FE8' },
-    { num:'05', label:'看自己', color:'1770EA' },
+    { num:'01', label:'看行业', color:'2971EB' },
+    { num:'02', label:'看客户', color:'22AAFE' },
+    { num:'03', label:'看机会', color:'05C8C8' },
+    { num:'04', label:'看竞争', color:'966EFF' },
+    { num:'05', label:'看自己', color:'2971EB' },
   ];
 
   DEFAULTS.forEach((def, i) => {
@@ -1635,7 +1637,7 @@ function addIPDFiveViewSlide(pres, A, data, pageNum) {
       fontFace: 'Microsoft YaHei', valign: 'middle' });
 
     s.addShape(pres.ShapeType.rect, { x: cx, y: GY+hH, w: cW, h: GH-hH,
-      fill: { color: 'EEF4FF' }, line: { type: 'none' }, shadow: mkShS() });
+      fill: { color: 'E7F1FF' }, rectRadius: 0.12, line: { type: 'none' }, shadow: mkShS() });
 
     if (src.headline) {
       s.addText(src.headline, { x: cx+0.14, y: GY+hH+0.14, w: cW-0.28, h: 0.54,
@@ -1656,472 +1658,401 @@ function addIPDFiveViewSlide(pres, A, data, pageNum) {
 
 ---
 
-## 版式 26 — 图标行列表（Icon Row List）
+## ═══ 新增版式（v3.0）════════════════════════════════════
 
-**Vibe**：活力生态 ｜**场景**：功能列举、服务亮点、优势对比（纯文本幻灯片的视觉替代方案）
+---
+
+## 版式 26 — 图标+文字行（Icon Row List）
+
+**Vibe**：专业严谨 ｜**场景**：功能列举、优势说明、服务条目（横向行排，每行图标+标题+描述）
 
 ```javascript
-// ══════════════════════════════════════════════════════════════════════
-// 版式 26 — 图标行列表（Icon Row List）
-// ══════════════════════════════════════════════════════════════════════
 /**
- * addIconRowSlide — 彩色圆圈图标 + 粗体标题 + 下方描述（左对齐）
- * 每行结构：[彩色圆图标] [粗体标题]
- *                        [描述文字，左对齐]
- * 最多 5 行；行间距 0.30"（统一间距标准）
- * 视觉锚点：交替浅色底 + 左侧彩色细条 + 彩色图标圆
- *
- * @param {Object} data
- *   title    {string}
- *   subtitle {string}
- *   rows     Array<{ icon, title, body, color }>
+ * 4–5 行图标+文字行排版
+ * rows: [
+ *   { icon:'⚡', color:'2971EB', title:'极速响应', body:'毫秒级处理，零感知等待' },
+ *   { icon:'🔒', color:'05C8C8', title:'安全合规', body:'等保三级，数据主权可控' },
+ *   { icon:'🌐', color:'966EFF', title:'生态开放', body:'2800+ ISV 认证合作伙伴' },
+ *   { icon:'📊', color:'FFB61A', title:'智能洞察', body:'AI 驱动实时分析与趋势预测' },
+ * ]
+ * 布局：左侧彩色圆圈图标（Ø 0.52"）→ 粗体标题（18pt）→ 描述文字（14pt）
+ * 间距：行间 0.30"，边距 0.50"（符合设计规范）
  */
-function addIconRowSlide(pres, A, { title, subtitle, rows = [] }, pageNum) {
+function addIconRowSlide(pres, A, { title, subtitle, rows }, pageNum) {
   const s = pres.addSlide();
   s.background = { color: 'FFFFFF' };
   addLogo(s, A, false);
   addContentTitle(s, title, subtitle);
-  addFooter(s, pageNum, false);
 
-  const n = Math.min(rows.length, 5);
-  if (n === 0) return;
+  const MARGIN  = 0.50;           // 左边距（0.5" 规范）
+  const ROW_GAP = 0.30;           // 行间距（0.3" 规范）
+  const ICO_R   = 0.26;           // 圆形图标半径
+  const ICO_D   = ICO_R * 2;      // 直径 0.52"
+  const ROW_H   = 0.85;           // 每行高度
+  const START_Y = 1.55;
+  const TEXT_X  = MARGIN + ICO_D + 0.22;  // 文字起始 x
+  const TEXT_W  = 13.333 - TEXT_X - MARGIN;
 
-  const ROW_GAP = 0.30;                // 统一行间距
-  const sY = 1.55, totalH = 5.65;
-  const ROW_H = (totalH - ROW_GAP * (n - 1)) / n;
-  const sX     = 0.500;               // ≥ 0.5" 最小边距
-  const totalW = 12.190;
-  const ICON_R = 0.33;
-  const textX  = sX + ICON_R * 2 + 0.28;
-  const textW  = totalW - (ICON_R * 2 + 0.28);
+  (rows || []).slice(0, 5).forEach((row, i) => {
+    const rowY = START_Y + i * (ROW_H + ROW_GAP);
+    const col  = row.color || COLOR_SEQ[i % COLOR_SEQ.length];
 
-  rows.slice(0, n).forEach((row, i) => {
-    const ry  = sY + i * (ROW_H + ROW_GAP);
-    const col = row.color || COLOR_SEQ[i % COLOR_SEQ.length];
-    const icoCX = sX + ICON_R;
-    const icoCY = ry + ROW_H / 2;
-
-    // 交替浅色底
-    if (i % 2 === 0) {
-      s.addShape(pres.ShapeType.rect, {
-        x: sX - 0.06, y: ry, w: totalW + 0.10, h: ROW_H,
-        fill: { color: 'F5F8FF' }, line: { type: 'none' },
-      });
-    }
-
-    // 左侧彩色细条（视觉锚点）
-    s.addShape(pres.ShapeType.rect, {
-      x: sX - 0.06, y: ry, w: 0.07, h: ROW_H,
-      fill: { color: col }, line: { type: 'none' },
-    });
-
-    // 彩色圆圈图标
+    // 彩色圆圈（垂直居中于行）
+    const icoCY = rowY + ROW_H / 2;
     s.addShape(pres.ShapeType.oval, {
-      x: icoCX - ICON_R, y: icoCY - ICON_R,
-      w: ICON_R * 2, h: ICON_R * 2,
-      fill: { color: col }, shadow: mkShB(),
+      x: MARGIN, y: icoCY - ICO_R, w: ICO_D, h: ICO_D,
+      fill: { color: col }, line: { type: 'none' },
+      shadow: { type: 'outer', blur: 6, offset: 2, angle: 135, color: col, opacity: 0.25 },
     });
     if (row.icon) {
       s.addText(row.icon, {
-        x: icoCX - ICON_R, y: icoCY - ICON_R,
-        w: ICON_R * 2, h: ICON_R * 2,
-        fontSize: 20, fontFace: 'Microsoft YaHei',
+        x: MARGIN, y: icoCY - ICO_R, w: ICO_D, h: ICO_D,
+        fontSize: 18, fontFace: 'Microsoft YaHei',
         color: 'FFFFFF', align: 'center', valign: 'middle', margin: 0,
       });
     }
 
-    // 粗体标题（左对齐）
-    const titleH = 0.40;
-    const bodyH  = ROW_H - titleH - 0.16;
-    const titleY = ry + (ROW_H - titleH - bodyH - 0.10) / 2;
-
+    // 粗体标题
     s.addText(row.title || '', {
-      x: textX, y: titleY, w: textW, h: titleH,
-      fontSize: 17, bold: true, color: '262626',
+      x: TEXT_X, y: rowY, w: TEXT_W, h: 0.38,
+      fontSize: 18, bold: true, color: '373838',
       fontFace: 'Microsoft YaHei', valign: 'middle', margin: 0,
     });
 
-    // 描述文字（左对齐，位于标题下方）
+    // 描述文字
     if (row.body) {
       s.addText(row.body, {
-        x: textX, y: titleY + titleH + 0.06, w: textW, h: bodyH,
-        fontSize: 13, color: '666666',
+        x: TEXT_X, y: rowY + 0.40, w: TEXT_W, h: 0.42,
+        fontSize: 14, color: 'BFBFBF',
         fontFace: 'Microsoft YaHei', valign: 'top', margin: 0, wrap: true,
       });
     }
+
+    // 行底分隔线（最后一行不加）
+    if (i < (rows || []).length - 1) {
+      s.addShape(pres.ShapeType.line, {
+        x: MARGIN, y: rowY + ROW_H + ROW_GAP / 2,
+        w: 13.333 - MARGIN * 2, h: 0,
+        line: { color: 'E7F1FF', width: 0.5 },
+      });
+    }
   });
+
+  addFooter(s, pageNum, false);
 }
 ```
 
 ---
 
-## 版式 27 — 双栏右视觉面板（Left Bullets + Right Visual Anchor）
+## 版式 27 — 半出血叠加页（Half-Bleed Overlay）
 
-**Vibe**：通用 ｜**场景**：论点+数据佐证、观点+金句强调——强制为每页内容页添加视觉锚点
+**Vibe**：活力生态 ｜**场景**：产品截图+功能说明、案例展示+数字亮点、图片为主带内容标注
 
 ```javascript
-// ══════════════════════════════════════════════════════════════════════
-// 版式 27 — 双栏右视觉面板
-// ══════════════════════════════════════════════════════════════════════
 /**
- * addDualPanelSlide — 左侧要点（左对齐）+ 右侧深色视觉面板
- * 解决「纯文本幻灯片」问题：强制右侧视觉锚点，无需图片素材
+ * 右侧全幅出血图片（60% 宽），内容卡片叠加在图片左侧区域
+ * 与版式 17（图文沉浸）的区别：内容卡叠加在图片上方，而非纯白文字区
  *
- * @param {Object} data
- *   title      {string}
- *   subtitle   {string}
- *   points     Array<{ text, bold, highlight }>   左侧要点，左对齐
- *   panel      {Object}
- *     type       'stat' | 'icon' | 'quote'
- *     color      面板主题色，默认 '1770EA'
- *     number     (stat) 大数字，如 '83%'
- *     unit       (stat) 单位，如 '↑'
- *     label      大字下方说明文字
- *     icon       (icon) 大图标 emoji，如 '🚀'
- *     quote      (quote) 金句文字（≤30字）
- *
- * 左右比例：58% / 38%（间距 0.50"）
+ * imgData:   base64 图片（必须提供；无图则用品牌色占位块）
+ * imgSide:   'right'（默认）或 'left'
+ * overlayCards: [{ icon, stat, label }]  叠加统计卡（最多 3 个）
+ * points:    [{ text, bold }]  主文字要点（最多 4 条）
  */
-function addDualPanelSlide(pres, A, { title, subtitle, points = [], panel = {} }, pageNum) {
+function addHalfBleedOverlaySlide(pres, A, { title, imgData, imgSide = 'right', overlayCards, points }, pageNum) {
   const s = pres.addSlide();
   s.background = { color: 'FFFFFF' };
-  addLogo(s, A, false);
-  addContentTitle(s, title, subtitle);
-  addFooter(s, pageNum, false);
+  addLogo(s, A, imgSide === 'left');  // 图在左时用白色 logo
 
-  const sX     = 0.500;
-  const sY     = 1.55;
-  const totalW = 12.190;
-  const totalH = 5.65;
-  const leftW  = totalW * 0.58;         // ~7.07"
-  const GAP    = 0.50;                  // 两栏间距 0.50"
-  const rightX = sX + leftW + GAP;
-  const rightW = totalW - leftW - GAP;  // ~4.62"
-  const col    = panel.color || '1770EA';
+  const IMG_W  = 7.80;   // 图片宽度（~58%）
+  const IMG_H  = 7.50;   // 全高出血
+  const CARD_W = 5.10;   // 内容区宽度
+  const MARGIN = 0.50;
 
-  // ── 左侧：要点列表（左对齐，段落间距 0.30" 等效）
-  const items = points.map((p, i) => ({
+  const imgX = imgSide === 'right' ? 13.333 - IMG_W : 0;
+  const txtX = imgSide === 'right' ? MARGIN : IMG_W + 0.40;
+
+  // 全幅图片（从顶到底出血）
+  if (imgData) {
+    s.addImage({ data: imgData, x: imgX, y: 0, w: IMG_W, h: IMG_H,
+      sizing: { type: 'cover', w: IMG_W, h: IMG_H } });
+  } else {
+    s.addShape(pres.ShapeType.rect, { x: imgX, y: 0, w: IMG_W, h: IMG_H,
+      fill: { color: '28245F' } });
+    s.addText('[图片占位]', { x: imgX, y: IMG_H/2-0.3, w: IMG_W, h: 0.6,
+      fontSize: 14, color: 'BFBFBF', align: 'center', italic: true,
+      fontFace: 'Microsoft YaHei', margin: 0 });
+  }
+
+  // 左/右内容区
+  // 标题
+  s.addText(title || '', {
+    x: txtX, y: 0.80, w: CARD_W, h: 0.72,
+    fontSize: 22, bold: true, color: '373838',
+    fontFace: 'Microsoft YaHei', valign: 'middle', margin: 0,
+  });
+
+  // 主要点列表
+  const items = (points || []).map((p, i) => ({
     text: p.text,
     options: {
       bullet: true,
       breakLine: i < points.length - 1,
-      fontSize: p.bold ? 19 : 17,
-      color: p.highlight ? '1770EA' : '333333',
+      fontSize: p.bold ? 17 : 15,
+      color: p.bold ? '2971EB' : '373838',
       bold: p.bold || false,
       fontFace: 'Microsoft YaHei',
-      paraSpaceAfter: 18,
-    },
+      paraSpaceAfter: 14,
+    }
   }));
   if (items.length) {
     s.addText(items, {
-      x: sX, y: sY, w: leftW, h: totalH,
+      x: txtX, y: 1.68, w: CARD_W, h: 3.40,
       valign: 'top', fontFace: 'Microsoft YaHei',
     });
   }
 
-  // ── 右侧：视觉面板（圆角深色卡片）
-  s.addShape(pres.ShapeType.roundRect, {
-    x: rightX, y: sY, w: rightW, h: totalH,
-    fill: { color: col }, rectRadius: 0.10, shadow: mkShB(),
-  });
+  // 叠加统计卡（浮于底部，叠加在图片上）
+  if (overlayCards && overlayCards.length) {
+    const n     = Math.min(overlayCards.length, 3);
+    const cW    = (IMG_W - 0.30 * (n + 1)) / n;
+    const cH    = 1.20;
+    const cY    = IMG_H - cH - 0.40;
 
-  if (panel.type === 'stat' || (!panel.type && panel.number)) {
-    // 大数字模式
-    s.addText((panel.number || '') + (panel.unit || ''), {
-      x: rightX + 0.20, y: sY + 0.70, w: rightW - 0.40, h: 2.40,
-      fontSize: 80, bold: true, color: 'FFFFFF',
-      fontFace: 'Microsoft YaHei',
-      align: 'center', valign: 'middle', margin: 0, fit: 'shrink',
-    });
-    if (panel.label) {
-      s.addText(panel.label, {
-        x: rightX + 0.20, y: sY + 3.20, w: rightW - 0.40, h: 0.52,
-        fontSize: 15, color: 'D0E8FF',
-        fontFace: 'Microsoft YaHei', align: 'center', margin: 0,
-      });
-    }
-  } else if (panel.type === 'icon') {
-    // 大图标模式
-    if (panel.icon) {
-      s.addText(panel.icon, {
-        x: rightX + 0.20, y: sY + 1.20, w: rightW - 0.40, h: 2.20,
-        fontSize: 90, fontFace: 'Microsoft YaHei',
-        color: 'FFFFFF', align: 'center', valign: 'middle', margin: 0,
-      });
-    }
-    if (panel.label) {
-      s.addText(panel.label, {
-        x: rightX + 0.20, y: sY + 3.60, w: rightW - 0.40, h: 0.52,
-        fontSize: 15, color: 'D0E8FF',
-        fontFace: 'Microsoft YaHei', align: 'center', margin: 0,
-      });
-    }
-  } else if (panel.type === 'quote') {
-    // 金句模式
-    s.addText('\u275D', {
-      x: rightX + 0.25, y: sY + 0.40, w: 0.60, h: 0.60,
-      fontSize: 36, color: 'D0E8FF',
-      fontFace: 'Microsoft YaHei', margin: 0,
-    });
-    s.addText(panel.quote || '', {
-      x: rightX + 0.25, y: sY + 1.00, w: rightW - 0.50, h: 3.80,
-      fontSize: 17, color: 'FFFFFF',
-      fontFace: 'Microsoft YaHei',
-      valign: 'middle', margin: 0, wrap: true, lineSpacingMultiple: 1.4,
-    });
-  }
-}
-```
-
----
-
-## 版式 28 — 对比条形页（Before/After / Option A vs B）
-
-**Vibe**：专业严谨 ｜**场景**：传统 vs AI 原生、方案选项横向评估、指标前后对比
-
-```javascript
-// ══════════════════════════════════════════════════════════════════════
-// 版式 28 — 对比条形页
-// ══════════════════════════════════════════════════════════════════════
-/**
- * addCompareBarSlide — 水平条形对比（视觉化前后或方案对比）
- * 每行：维度标签 | 左侧条形（方案A）| 右侧条形（方案B）
- * 最多 5 行；行间距 0.30"
- *
- * @param {Object} data
- *   title       {string}
- *   subtitle    {string}
- *   leftLabel   左侧方案标签，如 '传统模式'
- *   rightLabel  右侧方案标签，如 'AI 原生'
- *   leftColor   默认 'AAAAAA'
- *   rightColor  默认 '1770EA'
- *   items       Array<{ label, left:0-100, right:0-100, unit }>
- */
-function addCompareBarSlide(pres, A, { title, subtitle, leftLabel, rightLabel, items = [], leftColor, rightColor }, pageNum) {
-  const s = pres.addSlide();
-  s.background = { color: 'FFFFFF' };
-  addLogo(s, A, false);
-  addContentTitle(s, title, subtitle);
-  addFooter(s, pageNum, false);
-
-  const lCol  = leftColor  || 'AAAAAA';
-  const rCol  = rightColor || '1770EA';
-  const n     = Math.min(items.length, 5);
-  const sX    = 0.500;
-  const totalW = 12.190;
-
-  const labelW  = 2.40;
-  const barX    = sX + labelW + 0.30;
-  const barAreaW = totalW - labelW - 0.30;
-  const halfW   = (barAreaW - 0.20) / 2;
-
-  const HEADER_H = 0.46;
-  const ROW_GAP  = 0.30;
-  const sY       = 1.55;
-  const contentY = sY + HEADER_H + 0.20;
-  const contentH = 5.65 - HEADER_H - 0.20;
-  const ROW_H    = (contentH - ROW_GAP * (n - 1)) / n;
-
-  // 表头
-  [[lCol, leftLabel || '方案 A', barX],
-   [rCol, rightLabel || '方案 B', barX + halfW + 0.20]].forEach(([c, label, x]) => {
-    s.addShape(pres.ShapeType.rect, {
-      x, y: sY, w: halfW, h: HEADER_H,
-      fill: { color: c }, line: { type: 'none' }, shadow: mkShS(),
-    });
-    s.addText(label, {
-      x, y: sY, w: halfW, h: HEADER_H,
-      fontSize: 14, bold: true, color: 'FFFFFF',
-      fontFace: 'Microsoft YaHei', align: 'center', valign: 'middle', margin: 0,
-    });
-  });
-
-  items.slice(0, n).forEach((item, i) => {
-    const ry = contentY + i * (ROW_H + ROW_GAP);
-
-    // 交替行背景
-    s.addShape(pres.ShapeType.rect, {
-      x: sX - 0.06, y: ry, w: totalW + 0.10, h: ROW_H,
-      fill: { color: i % 2 === 0 ? 'F7F9FF' : 'FFFFFF' }, line: { type: 'none' },
-    });
-
-    // 维度标签（左对齐）
-    s.addText(item.label || '', {
-      x: sX, y: ry, w: labelW, h: ROW_H,
-      fontSize: 14, bold: true, color: '333333',
-      fontFace: 'Microsoft YaHei', valign: 'middle', margin: 0,
-    });
-
-    const BAR_H = Math.min(ROW_H * 0.52, 0.44);
-    const barY  = ry + (ROW_H - BAR_H) / 2;
-
-    [[lCol, item.left || 0, barX, 'right'],
-     [rCol, item.right || 0, barX + halfW + 0.20, 'left']].forEach(([c, val, bx, numAlign]) => {
-      const fill = Math.min(Math.max(val, 0), 100) / 100;
-      // 背景轨道
+    overlayCards.slice(0, n).forEach((oc, i) => {
+      const cx = imgX + 0.30 + i * (cW + 0.30);
+      // 半透明白色底卡
       s.addShape(pres.ShapeType.rect, {
-        x: bx, y: barY, w: halfW, h: BAR_H,
-        fill: { color: 'EEEEEE' }, line: { type: 'none' },
+        x: cx, y: cY, w: cW, h: cH,
+        fill: { color: 'FFFFFF', transparency: 15 },
+        rectRadius: 0.12, shadow: mkShS(),
       });
-      // 实际填充
-      if (fill > 0) {
-        s.addShape(pres.ShapeType.rect, {
-          x: bx, y: barY, w: halfW * fill, h: BAR_H,
-          fill: { color: c }, line: { type: 'none' }, shadow: mkShS(),
+      // 大数字
+      if (oc.stat) {
+        s.addText(oc.stat, {
+          x: cx + 0.10, y: cY + 0.08, w: cW - 0.20, h: 0.60,
+          fontSize: 28, bold: true, color: '2971EB',
+          fontFace: 'Microsoft YaHei', align: 'center', valign: 'middle', margin: 0,
         });
       }
-      // 数值标签
-      const numColor = fill > 0.45 ? 'FFFFFF' : c;
-      const numX = numAlign === 'right' ? bx : bx + 0.10;
-      s.addText(`${val}${item.unit || ''}`, {
-        x: numX, y: barY, w: halfW - 0.10, h: BAR_H,
-        fontSize: 12, bold: true, color: numColor,
-        fontFace: 'Microsoft YaHei', align: numAlign, valign: 'middle', margin: 0,
-      });
+      // 标签
+      if (oc.label) {
+        s.addText(oc.label, {
+          x: cx + 0.10, y: cY + 0.72, w: cW - 0.20, h: 0.38,
+          fontSize: 12, color: '373838',
+          fontFace: 'Microsoft YaHei', align: 'center', valign: 'top', margin: 0,
+        });
+      }
     });
-  });
+  }
+
+  addFooter(s, pageNum, false);
 }
 ```
 
 ---
 
-## 版式 29 — 增强步骤流程（数字徽章 + 图标 + 箭头）
+## 版式 28 — 悬浮统计页（Floating Stats）
 
-**Vibe**：专业严谨 / 活力生态 ｜**场景**：实施步骤、工作流、方案路径——比版式 07 视觉更丰富
+**Vibe**：极简震撼 ｜**场景**：2–4 个关键数据，白底无卡片容器，数字直接呼吸在版面上
 
 ```javascript
-// ══════════════════════════════════════════════════════════════════════
-// 版式 29 — 增强步骤流程
-// ══════════════════════════════════════════════════════════════════════
 /**
- * addEnhancedFlowSlide — 编号徽章 + 图标圆 + 箭头连接
- * 与版式 07 的区别：
- *   - 大号圆形数字徽章（悬浮在卡片顶部，形成视觉主心骨）
- *   - 卡片顶部彩色细条
- *   - 内容左对齐，段落间距 0.30"
- *   - 箭头可见但简洁（灰色横线）
+ * 与版式 11（数据看板）的区别：无卡片底色，数字直接浮于白底，呼吸感极强
+ * 适合：年报关键数字、成果页、背景有图的数字摘要
  *
- * @param {Object} data
- *   title    {string}
- *   subtitle {string}
- *   steps    Array<{ icon, title, body, color }>（3-5步）
- *   note     底部备注（可选）
+ * stats: [
+ *   { value:'8.4B', unit:'元', label:'生态总GMV', sub:'同比 +83.7%', color:'2971EB' },
+ *   { value:'+83%', unit:'',  label:'年增长率',  sub:'连续三年',      color:'22AAFE' },
+ *   { value:'2800+',unit:'',  label:'ISV伙伴',   sub:'覆盖全行业',   color:'05C8C8' },
+ * ]
+ * 大数字字号：60–72pt（按数量自适应）
  */
-function addEnhancedFlowSlide(pres, A, { title, subtitle, steps = [], note }, pageNum) {
+function addFloatingStatsSlide(pres, A, { title, subtitle, stats }, pageNum) {
   const s = pres.addSlide();
   s.background = { color: 'FFFFFF' };
   addLogo(s, A, false);
   addContentTitle(s, title, subtitle);
-  addFooter(s, pageNum, false);
 
-  const n = Math.min(steps.length, 5);
-  if (n === 0) return;
+  const n      = Math.min((stats || []).length, 4);
+  if (n === 0) { addFooter(s, pageNum, false); return; }
 
-  const sX     = 0.500;
-  const sY     = 1.60;
-  const totalW = 12.190;
-  const totalH = note ? 5.00 : 5.40;
+  const MARGIN = 0.50;
+  const GAP    = 0.50;
+  const totalW = 13.333 - MARGIN * 2;
+  const colW   = (totalW - GAP * (n - 1)) / n;
+  const START_Y = subtitle ? 1.40 : 1.60;
+  const NUM_FS = n <= 2 ? 72 : (n === 3 ? 66 : 60);
 
-  const ARROW_W = 0.38;
-  const cW      = (totalW - ARROW_W * (n - 1)) / n;
-  const BADGE_R = 0.42;                            // 数字徽章半径
-  const ICON_R  = 0.26;                            // 图标小圆半径
-  const CARD_Y  = sY + BADGE_R * 2 + 0.12;        // 卡片顶（徽章下方）
-  const CARD_H  = totalH - BADGE_R * 2 - 0.12;
+  stats.slice(0, n).forEach((stat, i) => {
+    const cx    = MARGIN + i * (colW + GAP);
+    const col   = stat.color || COLOR_SEQ[i % COLOR_SEQ.length];
 
-  steps.slice(0, n).forEach((step, i) => {
-    const x   = sX + i * (cW + ARROW_W);
-    const col = step.color || COLOR_SEQ[i % COLOR_SEQ.length];
-    const badgeCX = x + cW / 2;
-    const badgeCY = sY + BADGE_R;
-
-    // 卡片（圆角，浅底）
-    s.addShape(pres.ShapeType.roundRect, {
-      x, y: CARD_Y, w: cW, h: CARD_H,
-      fill: { color: 'F5F7FA' }, rectRadius: 0.06, shadow: mkShS(),
-    });
-    // 顶部彩色细条
-    s.addShape(pres.ShapeType.rect, {
-      x, y: CARD_Y, w: cW, h: 0.09,
-      fill: { color: col }, line: { type: 'none' },
+    // 顶部品牌色细线（2pt，宽 0.60"）
+    s.addShape(pres.ShapeType.line, {
+      x: cx, y: START_Y, w: 0.60, h: 0,
+      line: { color: col, width: 2.5 },
     });
 
-    // 数字徽章（圆形，悬浮在卡片顶边缘）
-    s.addShape(pres.ShapeType.oval, {
-      x: badgeCX - BADGE_R, y: badgeCY - BADGE_R,
-      w: BADGE_R * 2, h: BADGE_R * 2,
-      fill: { color: col }, shadow: mkShB(),
-    });
-    s.addText(String(i + 1), {
-      x: badgeCX - BADGE_R, y: badgeCY - BADGE_R,
-      w: BADGE_R * 2, h: BADGE_R * 2,
-      fontSize: 22, bold: true, color: 'FFFFFF',
-      fontFace: 'Microsoft YaHei', align: 'center', valign: 'middle', margin: 0,
+    // 超大数字
+    const numText = (stat.value || '') + (stat.unit || '');
+    s.addText(numText, {
+      x: cx, y: START_Y + 0.20, w: colW, h: 1.80,
+      fontSize: NUM_FS, bold: true, color: col,
+      fontFace: 'Microsoft YaHei', valign: 'middle', margin: 0,
+      fit: 'shrink',
     });
 
-    // 图标小圆（附在徽章右下角）
-    if (step.icon) {
-      const icoCX = badgeCX + BADGE_R * 0.66;
-      const icoCY = badgeCY + BADGE_R * 0.66;
-      s.addShape(pres.ShapeType.oval, {
-        x: icoCX - ICON_R, y: icoCY - ICON_R,
-        w: ICON_R * 2, h: ICON_R * 2,
-        fill: { color: 'FFFFFF' }, line: { color: col, pt: 1.5 },
-      });
-      s.addText(step.icon, {
-        x: icoCX - ICON_R, y: icoCY - ICON_R,
-        w: ICON_R * 2, h: ICON_R * 2,
-        fontSize: 13, fontFace: 'Microsoft YaHei',
-        color: col, align: 'center', valign: 'middle', margin: 0,
-      });
-    }
-
-    // 步骤标题（卡片内，左对齐）
-    const innerX = x + 0.18;
-    const innerW = cW - 0.36;
-    const innerY = CARD_Y + 0.22;
-
-    s.addText(step.title || '', {
-      x: innerX, y: innerY, w: innerW, h: 0.50,
-      fontSize: 15, bold: true, color: '262626',
+    // 标签（粗体中号）
+    s.addText(stat.label || '', {
+      x: cx, y: START_Y + 2.10, w: colW, h: 0.48,
+      fontSize: 16, bold: true, color: '373838',
       fontFace: 'Microsoft YaHei', valign: 'middle', margin: 0,
     });
 
-    // 步骤描述（左对齐，段落间距 0.30"）
-    if (step.body) {
-      s.addText(step.body, {
-        x: innerX, y: innerY + 0.56, w: innerW, h: CARD_H - 0.82,
-        fontSize: 13, color: '555555',
-        fontFace: 'Microsoft YaHei', valign: 'top', margin: 0, wrap: true,
-        lineSpacingMultiple: 1.3,
-      });
-    }
-
-    // 箭头（步骤之间，灰色横线）
-    if (i < n - 1) {
-      const arrowX = x + cW + 0.05;
-      const arrowY = CARD_Y + CARD_H / 2;
-      s.addShape(pres.ShapeType.rect, {
-        x: arrowX, y: arrowY - 0.04, w: ARROW_W - 0.10, h: 0.07,
-        fill: { color: 'CCCCCC' }, line: { type: 'none' },
-      });
-      // 箭头三角头部
-      s.addShape(pres.ShapeType.rect, {
-        x: arrowX + ARROW_W - 0.16, y: arrowY - 0.12,
-        w: 0.11, h: 0.23,
-        fill: { color: 'CCCCCC' }, line: { type: 'none' },
+    // 副说明（小字，品牌色）
+    if (stat.sub) {
+      s.addText(stat.sub, {
+        x: cx, y: START_Y + 2.62, w: colW, h: 0.38,
+        fontSize: 13, color: col,
+        fontFace: 'Microsoft YaHei', valign: 'top', margin: 0,
       });
     }
   });
 
-  // 底部备注
-  if (note) {
-    s.addText(`⚠ ${note}`, {
-      x: sX, y: CARD_Y + CARD_H + 0.18, w: totalW, h: 0.30,
-      fontSize: 12, color: 'FFC000',
-      fontFace: 'Microsoft YaHei', margin: 0,
+  addFooter(s, pageNum, false);
+}
+```
+
+---
+
+## 版式 29 — 对比栏（Before / After / Pros & Cons）
+
+**Vibe**：专业严谨 ｜**场景**：前后对比、优缺点、两方案并排比较
+
+```javascript
+/**
+ * 两栏对比，中央垂直分隔
+ * left:  { header, headerColor, points: string[] }
+ * right: { header, headerColor, points: string[] }
+ * dividerLabel: 分隔线中央标签（可选，如 'VS'）
+ *
+ * 示例：
+ * left:  { header:'传统 ERP', headerColor:'28245F', points:['烟囱式独立应用','人工编码为主','按项目收费'] }
+ * right: { header:'AI 原生', headerColor:'2971EB', points:['Skill化原子能力','SDD规范驱动','SaaS订阅+分润'] }
+ * dividerLabel: 'VS'
+ */
+function addCompareSlide(pres, A, { title, subtitle, left, right, dividerLabel }, pageNum) {
+  const s = pres.addSlide();
+  s.background = { color: 'FFFFFF' };
+  addLogo(s, A, false);
+  addContentTitle(s, title, subtitle);
+
+  const MARGIN  = 0.50;
+  const GAP     = 0.28;           // 中央分隔区宽度
+  const TOTAL_W = 13.333 - MARGIN * 2;
+  const COL_W   = (TOTAL_W - GAP) / 2;
+  const START_Y = subtitle ? 1.42 : 1.60;
+  const HEADER_H = 0.60;
+  const BODY_H   = 7.50 - START_Y - HEADER_H - 0.40;
+  const lX = MARGIN;
+  const rX = MARGIN + COL_W + GAP;
+  const divX = MARGIN + COL_W;
+
+  // ── 左侧表头
+  const lCol = (left && left.headerColor) || '28245F';
+  s.addShape(pres.ShapeType.rect, {
+    x: lX, y: START_Y, w: COL_W, h: HEADER_H,
+    fill: { color: lCol }, line: { type: 'none' },
+  });
+  s.addText((left && left.header) || '选项 A', {
+    x: lX + 0.20, y: START_Y, w: COL_W - 0.40, h: HEADER_H,
+    fontSize: 18, bold: true, color: 'FFFFFF',
+    fontFace: 'Microsoft YaHei', valign: 'middle', margin: 0,
+  });
+
+  // ── 右侧表头
+  const rCol = (right && right.headerColor) || '2971EB';
+  s.addShape(pres.ShapeType.rect, {
+    x: rX, y: START_Y, w: COL_W, h: HEADER_H,
+    fill: { color: rCol }, line: { type: 'none' },
+  });
+  s.addText((right && right.header) || '选项 B', {
+    x: rX + 0.20, y: START_Y, w: COL_W - 0.40, h: HEADER_H,
+    fontSize: 18, bold: true, color: 'FFFFFF',
+    fontFace: 'Microsoft YaHei', valign: 'middle', margin: 0,
+  });
+
+  // ── 内容区底色
+  s.addShape(pres.ShapeType.roundRect, {
+    x: lX, y: START_Y + HEADER_H, w: COL_W, h: BODY_H,
+    fill: { color: 'E7F1FF' }, rectRadius: 0.15, line: { type: 'none' }, shadow: mkShS(),
+  });
+  s.addShape(pres.ShapeType.roundRect, {
+    x: rX, y: START_Y + HEADER_H, w: COL_W, h: BODY_H,
+    fill: { color: 'E7F1FF' }, rectRadius: 0.15, line: { type: 'none' }, shadow: mkShS(),
+  });
+
+  // ── 左侧要点（左对齐）
+  if (left && left.points && left.points.length) {
+    const items = left.points.map((p, i) => ({
+      text: p,
+      options: {
+        bullet: { type: 'bullet', indent: 10 },
+        breakLine: i < left.points.length - 1,
+        fontSize: 15, color: '373838', bold: false,
+        fontFace: 'Microsoft YaHei', paraSpaceAfter: 12,
+      }
+    }));
+    s.addText(items, {
+      x: lX + 0.22, y: START_Y + HEADER_H + 0.20,
+      w: COL_W - 0.44, h: BODY_H - 0.30,
+      valign: 'top', fontFace: 'Microsoft YaHei',
     });
   }
+
+  // ── 右侧要点（左对齐）
+  if (right && right.points && right.points.length) {
+    const items = right.points.map((p, i) => ({
+      text: p,
+      options: {
+        bullet: { type: 'bullet', indent: 10 },
+        breakLine: i < right.points.length - 1,
+        fontSize: 15, color: '373838', bold: false,
+        fontFace: 'Microsoft YaHei', paraSpaceAfter: 12,
+      }
+    }));
+    s.addText(items, {
+      x: rX + 0.22, y: START_Y + HEADER_H + 0.20,
+      w: COL_W - 0.44, h: BODY_H - 0.30,
+      valign: 'top', fontFace: 'Microsoft YaHei',
+    });
+  }
+
+  // ── 中央分隔线
+  const divMidX = divX + GAP / 2;
+  s.addShape(pres.ShapeType.line, {
+    x: divMidX, y: START_Y + 0.10,
+    w: 0, h: HEADER_H + BODY_H - 0.20,
+    line: { color: 'BFBFBF', width: 1, dashType: 'dash' },
+  });
+
+  // 可选中央标签（如 'VS'）
+  if (dividerLabel) {
+    s.addShape(pres.ShapeType.oval, {
+      x: divMidX - 0.28, y: START_Y + HEADER_H / 2 - 0.28,
+      w: 0.56, h: 0.56,
+      fill: { color: 'FFFFFF' }, line: { color: 'BFBFBF', width: 1 },
+      shadow: mkShS(),
+    });
+    s.addText(dividerLabel, {
+      x: divMidX - 0.28, y: START_Y + HEADER_H / 2 - 0.28,
+      w: 0.56, h: 0.56,
+      fontSize: 12, bold: true, color: 'BFBFBF',
+      fontFace: 'Microsoft YaHei', align: 'center', valign: 'middle', margin: 0,
+    });
+  }
+
+  addFooter(s, pageNum, false);
 }
 ```
 
@@ -2131,20 +2062,19 @@ function addEnhancedFlowSlide(pres, A, { title, subtitle, steps = [], note }, pa
 
 | 场景描述 | 推荐版式 | Vibe |
 |---------|---------|------|
-| 核心论点 / 战略方向 | **27 双栏右视觉面板**（替代 04 纯文本） | 通用 |
-| 核心论点（无需数据佐证） | 04 要点列表 | 通用 |
-| 数据指标 / KPI / 成果 | 05 数据卡片 / **11 大数字看板** | 通用 / 极简 |
-| 新旧对比 / 指标对比（视觉化） | **28 对比条形页** | 专业严谨 |
-| 新旧对比 / 文字方案对比 | 06 左右对比 | 专业严谨 |
-| 实施步骤 / 工作流（视觉增强） | **29 增强步骤流程** | 专业严谨 / 活力 |
-| 实施步骤（简洁版） | 07 横向流程 | 专业严谨 |
+| 核心论点 / 战略方向 | 04 要点列表 | 通用 |
+| 功能列举 / 服务条目 | **26 图标+文字行** | 活力生态 |
+| 数据指标 / KPI | 05 数据卡片 / **11 大数字看板** | 通用 / 极简 |
+| 关键数字悬浮展示 | **28 悬浮统计** | 极简震撼 |
+| 新旧对比 / 优缺点 | **29 对比栏** | 专业严谨 |
+| 矩阵/成熟度对比 | 15 分层矩阵 | 专业严谨 |
+| 实施步骤 / 工作流 | 07 横向流程 | 专业严谨 |
 | 产品截图 / 案例 | 08 图文并排 / **17 图文沉浸** | 通用 / 活力 |
+| 图片主导+数字叠加 | **27 半出血叠加** | 活力生态 |
 | 项目路线图 / 里程碑 | 09 时间轴 | 通用 |
-| 功能列举 / 优势亮点（行列式） | **26 图标行列表** | 活力生态 |
 | **核心特性矩阵** | **12 Bento Grid** | 极简 / 活力 |
 | **平台架构 / 生态体系** | **13 架构生态** | 专业严谨 |
-| **功能列举 / 亮点介绍（卡片式）** | **14 核心特性卡片** | 活力生态 |
-| **成熟度 / 对照分析** | **15 分层矩阵** | 专业严谨 |
+| **功能列举 / 亮点介绍** | **14 核心特性卡片** | 活力生态 |
 | **战略金句 / CEO宣言** | **16 金句引言页** | 极简震撼 |
 | **年度封底 / 战略口号** | **18 超大焦点页** | 极简震撼 |
 | **核心主张 + 三大支柱** | **19 金字塔/MECE** | 专业严谨 |
@@ -2154,23 +2084,3 @@ function addEnhancedFlowSlide(pres, A, { title, subtitle, steps = [], note }, pa
 | **方案说明 / 项目计划** | **23 5W1H 六格** | 专业严谨 |
 | **提案 / 问题分析报告** | **24 SCQA 四步** | 专业严谨 |
 | **战略发布 / 市场全景** | **25 IPD 五看** | 专业严谨 |
-
-### ⚠️ 反平庸原则：禁止纯文本幻灯片
-
-每张内容页必须满足以下之一：
-- 有数字大字（≥60pt）作为视觉主心骨
-- 有彩色图标圆或 Bento 卡片
-- 有图片/图表
-- 使用版式 27（双栏右视觉面板）替代纯文本版式 04
-
-**不要重复同一版式超过两张**：在大纲阶段强制版式多样化。
-
-### 统一间距标准
-
-| 间距场景 | 数值 | 说明 |
-|---------|------|------|
-| 最小页边距 | `0.500"` | 所有内容 x ≥ 0.5" |
-| 内容块之间 | `0.30"` 或 `0.50"` | 选一个，全页一致 |
-| 卡片间隙 | `0.12"` | Bento/流程卡片 |
-| 两栏间隔 | `0.50"` | 双栏版式标准间距 |
-| 段落间距 | `paraSpaceAfter: 18` | 约 0.30" 等效 |
