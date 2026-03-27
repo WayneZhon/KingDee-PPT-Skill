@@ -1,4 +1,4 @@
-# 金蝶 PPT 技术构建规范 PPTX Builder v2.0
+# 金蝶 PPT 技术构建规范 PPTX Builder v3.0
 > 基于官方模板 2026 版，从 XML 精确提取后重写。
 > v2.0 新增：内容密度守卫、模式 B python-pptx 解析模板、视觉 QA 升级。
 
