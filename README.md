@@ -1,86 +1,94 @@
 <div align="center">
 
 # 🏢 金蝶 PPT 生成 Skill
-## 一键将文字转换为金蝶官方风格幻灯片
 
-[![金蝶 PPT Skill](https://img.shields.io/badge/金蝶-PPT_Skill-1770EA?style=for-the-badge)](https://github.com/WayneZhon/KingDee-PPT-Skill)
-[![License](https://img.shields.io/github/license/WayneZhon/KingDee-PPT-Skill?style=for-the-badge)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/WayneZhon/KingDee-PPT-Skill?style=for-the-badge&color=FFC000)](https://github.com/WayneZhon/KingDee-PPT-Skill/stargazers)
+<p>
+  <a href="https://github.com/WayneZhon/KingDee-PPT-Skill">
+    <img src="https://img.shields.io/badge/金蝶-PPT_Skill-1770EA?style=flat-square" alt="Kingdee PPT Skill">
+  </a>
+  <a href="https://claude.ai">
+    <img src="https://img.shields.io/badge/Claude_Code-支持-432391?style=flat-square&logo=anthropic" alt="Claude Code">
+  </a>
+  <a href="https://tongyi.aliyun.com/lingma">
+    <img src="https://img.shields.io/badge/通义灵码-支持-FF6A00?style=flat-square" alt="通义灵码">
+  </a>
+  <a href="https://github.com/WayneZhon/KingDee-PPT-Skill/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/WayneZhon/KingDee-PPT-Skill?style=flat-square" alt="License">
+  </a>
+  <a href="https://github.com/WayneZhon/KingDee-PPT-Skill/stargazers">
+    <img src="https://img.shields.io/github/stars/WayneZhon/KingDee-PPT-Skill?style=flat-square&color=FFC000" alt="Stars">
+  </a>
+</p>
+
+**将文字、大纲、文档一键转换为金蝶官方风格 `.pptx` 幻灯片**
+
+完全复现金蝶国际软件集团 2026 版官方模板设计语言 · 支持 12 种版式 · 内嵌官方背景与 Logo · 零配置可用
 
 </div>
 
-> **一句话说明**：告别手动排版，把大纲/文档交给 AI，30 秒生成专业级金蝶风格 `.pptx` 幻灯片
-
 ---
 
-## ✨ 为什么选择这个 Skill？
+## ✨ 核心能力
 
-### 🎯 核心优势
-
-| 特性 | 说明 |
+| 能力 | 说明 |
 |------|------|
-| **🏢 官方设计还原** | 100% 还原金蝶 2026 版官方模板，品牌色、Logo、背景、字体完全对齐 |
-| **🤖 智能版式匹配** | 自动识别内容结构，智能选择最佳版式（金字塔、SWOT、PDCA、黄金圈等 7 种思维模型） |
-| **⚡ 零配置开箱即用** | 一键安装，无需配置品牌资源，内嵌官方背景图和 Logo |
-| **📊 18+ 专业版式** | 封面/目录/章节/数据卡片/对比/流程/时间轴/Bento Grid/架构图/金句引言… |
-| **🎯 一键生成文件** | 直接输出 `.pptx`，PowerPoint/WPS/Keynote 完全兼容，可二次编辑 |
-| **🔐 保密标识** | 自动添加「④ 内部公开 请勿外传」水印标识 |
+| 🎨 **官方设计还原** | 品牌色 `#1770EA` · 字体 · Logo · 背景图完全对齐 2026 版官方模板 |
+| 🧠 **思维模型识别** | 自动识别内容结构，匹配金字塔、SWOT、PDCA、黄金圈等 6 种思维框架 |
+| 📐 **12 种智能版式** | 封面、目录、章节页、要点列表、数据卡片、对比、流程、时间轴…… |
+| 📄 **多格式输入** | Markdown · 文本大纲 · Word 文档 · 直接粘贴内容均可 |
+| 🖼️ **图片占位符** | 自动生成占位框，方便后续插入截图、图表 |
+| 🔐 **保密标识** | 自动添加「④ 内部公开 请勿外传」水印标识 |
+| ✅ **视觉 QA** | 生成后自动转图检查，对齐问题自动修复再交付 |
 
 ---
 
-## 🚀 一键安装（30 秒上手）
+## 🚀 快速开始
 
-### ⚡ 自动安装脚本（推荐）
+> 不想看安装细节？直接跳到 [使用示例](#-使用示例)。
 
-```bash
-# Claude Code 用户
-curl -fsSL https://raw.githubusercontent.com/WayneZhon/KingDee-PPT-Skill/main/scripts/install.sh | bash
-```
+### 平台支持
 
-**自动脚本会完成：**
-- ✅ 克隆最新版本代码
-- ✅ 安装依赖（pptxgenjs 等）
-- ✅ 配置 Claude Code Skill
-- ✅ 验证安装成功
+| 平台 | 支持方式 | 推荐程度 |
+|------|---------|---------|
+| [Claude Code](#-方式一claude-code) | 原生 `.skill` 文件，完整工作流 | ⭐⭐⭐ 首选 |
+| [通义灵码 Qoder](#-方式二通义灵码-qoder) | 导入 Prompt 模板，核心功能可用 | ⭐⭐ 推荐 |
+| [Cursor / Windsurf](#-方式三cursor--windsurf) | 粘贴为项目规则，基础功能可用 | ⭐ 可用 |
 
 ---
 
-## 💻 平台支持矩阵
+## 📦 安装方法
 
-| 平台 | 安装方式 | 功能完整度 | 推荐指数 |
-|------|---------|-----------|---------|
-| **[Claude Code](#-claude-code)** | 原生 Skill | 🌟🌟🌟🌟🌟 100% | ⭐⭐⭐⭐⭐ 首选 |
-| **[通义灵码 Qoderwork](#-通义灵码-qoderwork)** | Prompt 模板导入 | 🌟🌟🌟🌟 85% | ⭐⭐⭐⭐ 推荐 |
-| **[亚马逊 Kiro](#-亚马逊-kiro)** | Prompt 模板导入 | 🌟🌟🌟🌟 85% | ⭐⭐⭐⭐ 推荐 |
-| **[Cursor / Windsurf](#-cursor--windsurf)** | 项目规则 | 🌟🌟🌟 70% | ⭐⭐⭐ 可用 |
+### 🔷 方式一：Claude Code
 
----
+Claude Code 支持原生 Skill，体验最完整，**推荐使用此方式**。
 
-## 📦 详细安装指南
-
-### 🟣 Claude Code（官方推荐）
-
-**方式一：自动脚本（最快）**
+**方法 A — Git 克隆（推荐）**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/WayneZhon/KingDee-PPT-Skill/main/scripts/install.sh | bash
-```
-
-**方式二：手动安装**
-
-```bash
-# 1. 克隆仓库
+# 1. 进入 Claude Code 的 skills 目录
 cd ~/.claude/skills/
+
+# 2. 克隆仓库
 git clone https://github.com/WayneZhon/KingDee-PPT-Skill.git kingdee-ppt
 
-# 2. 安装依赖（可选，自动脚本会处理）
-cd kingdee-ppt
-npm install pptxgenjs
-
-# 3. 重启 Claude Code
+# 3. 重启 Claude Code 即可生效
 ```
 
-**✅ 验证安装**
+**方法 B — 一键脚本**
+
+```bash
+curl -L https://github.com/WayneZhon/KingDee-PPT-Skill/archive/refs/heads/main.zip \
+  | unzip - -d ~/.claude/skills/ && \
+  mv ~/.claude/skills/KingDee-PPT-Skill-main ~/.claude/skills/kingdee-ppt
+```
+
+**方法 C — 手动安装**
+
+1. 前往 [Releases](https://github.com/WayneZhon/KingDee-PPT-Skill/releases) 下载最新 `.zip`
+2. 解压到 `~/.claude/skills/kingdee-ppt/`
+3. 重启 Claude Code
+
+**验证安装**
 
 打开 Claude Code，输入：
 
@@ -88,73 +96,66 @@ npm install pptxgenjs
 帮我做个金蝶 PPT
 ```
 
-若开始询问场景和页数，说明安装成功！🎉
+若 Claude 开始询问场景和页数，说明 Skill 已成功加载 ✅
 
 ---
 
-### 🟠 通义灵码 Qoderwork
+### 🟠 方式二：通义灵码 Qoder
 
-**步骤 1：获取 Prompt 文件**
+通义灵码（Tongyi Lingma）不支持 `.skill` 原生格式，但可将核心 Prompt 作为**自定义指令**导入，实现主要功能。
+
+**步骤 1 — 获取 Prompt 文件**
 
 ```bash
+# 克隆仓库
 git clone https://github.com/WayneZhon/KingDee-PPT-Skill.git
 ```
 
 或直接 [下载 ZIP](https://github.com/WayneZhon/KingDee-PPT-Skill/archive/refs/heads/main.zip)
 
-**步骤 2：导入自定义指令**
+**步骤 2 — 导入自定义指令**
 
-1. 打开通义灵码 Qoderwork（VS Code / JetBrains）
+1. 打开通义灵码插件（VS Code / JetBrains）
 2. 进入 **设置 → 自定义指令 → 新建**
-3. 将 `SKILL.md` 内容复制粘贴进去
+3. 将 `SKILL.md` + `style-guide.md` 的内容复制粘贴进去
 4. 命名为 `金蝶PPT生成`，保存
 
-**步骤 3：使用**
+**步骤 3 — 使用**
+
+在对话框中 `@金蝶PPT生成`，然后输入内容：
 
 ```
 @金蝶PPT生成 帮我把以下内容整理成金蝶风格的汇报材料：
 [你的内容]
 ```
 
-> ⚠️ **注意**：Qoderwork 不支持自动执行脚本生成 `.pptx`，需将生成的代码手动运行，或在 Claude Code 中执行。
+> ⚠️ **注意**：通义灵码方式不支持自动执行 Node.js 脚本生成 `.pptx`，需将生成的代码手动在本地运行，或切换到 Claude Code 使用完整工作流。
 
 ---
 
-### 🔵 亚马逊 Kiro
+### 🔵 方式三：Cursor / Windsurf
 
-**步骤 1：导入 Prompt**
+将 Skill 内容作为项目级规则使用。
 
-1. 打开 Kiro
-2. 进入 **Settings → Custom Agents → Create**
-3. **Name**: `金蝶PPT生成`
-4. **Description**: `将文字转换为金蝶官方风格幻灯片`
-5. **Prompt**: 粘贴 `SKILL.md` 全文
-6. 保存
+**步骤**
 
-**步骤 2：使用**
-
-```
-/金蝶PPT生成 帮我生成一份关于[主题]的金蝶风格汇报材料
-```
-
-> 💡 **提示**：Kiro 支持 `/命令` 触发自定义 Agent，体验流畅。
-
----
-
-### 🟢 Cursor / Windsurf
+1. 在你的项目根目录创建 `.cursorrules`（Cursor）或 `.windsurfrules`（Windsurf）
+2. 将 `SKILL.md` 内容粘贴进去
+3. 在对话中直接使用触发词即可
 
 ```bash
-# 在你的项目根目录
-curl -fsSL https://raw.githubusercontent.com/WayneZhon/KingDee-PPT-Skill/main/SKILL.md > .cursorrules
-```
+# Cursor
+cp path/to/kingdee-ppt/SKILL.md /your/project/.cursorrules
 
-或手动复制 `SKILL.md` 内容到 `.cursorrules` / `.windsurfrules`
+# Windsurf
+cp path/to/kingdee-ppt/SKILL.md /your/project/.windsurfrules
+```
 
 ---
 
-## 🎬 使用示例
+## 💬 使用示例
 
-### 场景 1：快速生成汇报材料
+### 基础用法
 
 ```
 帮我把以下内容做成金蝶风格的汇报材料：
@@ -169,87 +170,75 @@ curl -fsSL https://raw.githubusercontent.com/WayneZhon/KingDee-PPT-Skill/main/SK
 - 引入独立开发者激励计划
 ```
 
-### 场景 2：指定详细要求
+### 进阶用法（指定场景和要求）
 
 ```
-将以下内容转换为金蝶风格 PPT：
+将以下内容转换为金蝶风格 PPT，要求：
 - 场景：伙伴赋能
 - 页数：中等（10-15 页）
-- 包含图片占位符
-- 使用思维模型版式
+- 图片：保留占位符
+- 内容：请完整保留所有数据
 
 [粘贴你的文档内容]
 ```
 
-### 场景 3：上传文档转换
+### 上传文档
 
 ```
 （上传 .docx 或 .md 文件）
 帮我把这个文档转成金蝶风格的 PPT，场景是客户大会
 ```
 
-### 🎯 触发词参考
+### 触发词参考
 
-以下任一触发词都会激活 Skill：
+任何包含以下词语的句子都会自动激活 Skill：
 
-> `做PPT` · `金蝶PPT` · `金蝶模板` · `生成幻灯片` · `汇报材料` · `演示文稿` · `输出PPT` · `做个汇报` · `生成deck`
+> `做PPT` · `做个PPT` · `金蝶PPT` · `金蝶模板` · `生成幻灯片` · `汇报材料` · `演示文稿` · `生成deck` · `输出PPT`
 
 ---
 
-## 🏗️ 工作流说明
+## 🎬 工作流说明
+
+Skill 采用四阶段结构化流程，确保每次输出都经过内容确认和视觉质检：
 
 ```
-第零阶段：思维模型识别
-  └─ 扫描内容结构，自动匹配金字塔/SWOT/PDCA/黄金圈等版式
-
-第一阶段：内容发现
-  └─ 询问场景/页数/图片 → 生成大纲 → 用户确认
-
-第二阶段：内容脚本
-  └─ 输出逐页内容脚本（含排版指令）→ 用户审阅定稿
-
-第三阶段：生成交付
-  └─ 生成 Node.js 脚本 → 执行 → 转图 QA → 修复 → 交付 .pptx
+┌─────────────────────────────────────────────────────────┐
+│  第零阶段  思维模型识别                                    │
+│    扫描内容结构信号，自动匹配最合适的版式框架                 │
+├─────────────────────────────────────────────────────────┤
+│  第一阶段  内容发现                                        │
+│    询问场景 / 页数 / 图片处理方式 → 生成大纲 → 用户确认       │
+├─────────────────────────────────────────────────────────┤
+│  第二阶段  内容脚本                                        │
+│    输出逐页内容脚本（含版式排布指令）→ 用户审阅定稿            │
+├─────────────────────────────────────────────────────────┤
+│  第三阶段  生成交付                                        │
+│    生成 Node.js 脚本 → 执行 → 转图 QA → 修复 → 交付 .pptx  │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🗂️ 支持场景
+## 🗂️ 支持场景与页数
 
-| 场景 | 典型用途 | 建议页数 | 推荐版式 |
-|------|---------|---------|---------|
-| **内部汇报** | 工作进展、述职 | 5-10 页 | 数据卡片/要点列表/时间轴 |
-| **伙伴赋能** | ISV/OEM 培训 | 10-20 页 | 架构图/对比/流程/Bento Grid |
-| **客户大会** | 对外演示、发布 | 10-20 页 | 金句引言/大数字看板/黄金圈 |
-| **方案提案** | 立项/解决方案 | 20+ 页 | 对比/流程/思维模型组合 |
+| 场景 | 典型用途 | 建议页数 |
+|------|---------|---------|
+| **内部汇报** | 向上级汇报工作进展、述职 | 短（5-10 页） |
+| **伙伴赋能** | ISV / OEM / 开发者培训材料 | 中（10-20 页） |
+| **客户大会** | 对外客户演示、合作发布 | 中（10-20 页） |
+| **方案提案** | 项目立项、解决方案建议书 | 长（20 页+） |
 
 ---
 
-## 🎨 版式库一览
+## 🎨 支持版式
 
-### 标准版式（10 种）
-- 封面页 · 目录页 · 章节分隔页
-- 要点列表 · 数据卡片 · 左右对比 · 横向流程
-- 图文并排 · 时间轴 · 结尾致谢
+**标准版式（12 种）**
 
-### 思维模型版式（7 种）
-- **金字塔/MECE** - 核心结论+分论点
-- **PDCA 循环** - 计划-执行-检查-改进
-- **SWOT 矩阵** - 优势-劣势-机会-威胁
-- **黄金圈** - WHY-HOW-WHAT
-- **5W1H 六格** - 方案说明/项目计划
-- **SCQA 四步** - 场景-冲突-问题-解决
-- **IPD 五看** - 行业/客户/机会/竞争/自己
+封面页 · 目录页 · 章节分隔页 · 要点列表 · 数据卡片 · 左右对比 · 横向流程 · 纵向流程 · 图文并排 · 时间轴 · 引用语录 · 结尾致谢
 
-### 高级版式（8 种）
-- **Bento Grid** - 信息矩阵
-- **架构生态图** - 系统/生态体系
-- **核心特性卡片** - 功能亮点
-- **大数字看板** - KPI 指标
-- **金句引言页** - CEO 宣言/战略金句
-- **超大焦点页** - 年度封底/口号
-- **分层矩阵** - 成熟度分析
-- **时间轴里程碑** - 路线图
+**思维模型版式（6 种）**
+
+金字塔 / MECE · PDCA · SWOT · 黄金圈 · 5W1H · SCQA
 
 ---
 
@@ -257,47 +246,21 @@ curl -fsSL https://raw.githubusercontent.com/WayneZhon/KingDee-PPT-Skill/main/SK
 
 ```
 kingdee-ppt/
-├── SKILL.md                   # Skill 主配置（触发规则 + 完整工作流）
-├── style-guide.md             # 金蝶品牌视觉规范（颜色/字体/坐标/Logo）
-├── layout-presets-base.md     # 基础版式 01-10（必须加载）
-├── layout-presets-advanced.md # 高级版式 11-18（Bento/架构/金句等）
-├── layout-presets-models.md   # 思维模型版式 19-25（金字塔/黄金圈等）
-├── layout-presets-visual.md   # 视觉增强版式 26-29（图标行/对比条形等）
-├── pptx-builder.md            # 构建文档（QA 规范/常见陷阱）
-├── README.md                  # 本文件
-├── scripts/                   # 安装脚本
-│   └── install.sh             # 一键安装脚本
-├── assets/                    # 内嵌资源
-│   ├── bg_*.jpeg              # 背景图（封面/目录/章节/结尾）
-│   ├── logo_*.png             # Logo（彩色/反白）
-│   └── closing_thanks.png     # 多语言致谢
-└── LICENSE
+├── SKILL.md               # Skill 主配置（触发规则 + 完整工作流）
+├── style-guide.md         # 金蝶品牌视觉规范（颜色、字体、坐标、Logo）
+├── layout-presets.md      # 18 种版式 PptxGenJS 代码模板
+├── pptx-builder.md        # 技术构建文档（QA 规范、常见陷阱）
+├── README.md              # 本文件
+├── LICENSE                # MIT 许可证
+└── assets/                # 内嵌资源文件
+    ├── bg_cover.jpeg          # 封面背景
+    ├── bg_toc.png             # 目录页背景
+    ├── bg_section_a/b/c.jpeg  # 章节页背景（三色版）
+    ├── bg_closing.jpeg        # 结尾页背景
+    ├── closing_thanks.png     # 多语言致谢图
+    ├── logo_color.png         # 金蝶彩色 Logo
+    └── logo_white.png         # 金蝶反白 Logo
 ```
-
----
-
-## 🔧 技术依赖
-
-**生成 `.pptx` 文件需要的依赖：**
-
-```bash
-npm install pptxgenjs
-```
-
-**可选依赖（转图预览）：**
-
-```bash
-# macOS
-brew install libreoffice poppler
-
-# Linux
-sudo apt-get install libreoffice poppler-utils
-
-# Windows
-# 安装 LibreOffice: https://www.libreoffice.org/download/download/
-```
-
-> 💡 **提示**：自动安装脚本会自动检测并安装所需依赖。
 
 ---
 
@@ -306,7 +269,7 @@ sudo apt-get install libreoffice poppler-utils
 <details>
 <summary><b>Q1：生成的 PPT 可以在 PowerPoint / WPS 中编辑吗？</b></summary>
 
-可以。输出的 `.pptx` 完全兼容 Microsoft PowerPoint、WPS Office、Apple Keynote 等，所有文本、形状均可二次编辑。
+可以。输出的 `.pptx` 完全兼容 Microsoft PowerPoint、WPS Office、Apple Keynote 等主流软件，所有文本、形状均可二次编辑。
 </details>
 
 <details>
@@ -316,37 +279,35 @@ sudo apt-get install libreoffice poppler-utils
 </details>
 
 <details>
-<summary><b>Q3：如何更新到最新版本？</b></summary>
+<summary><b>Q3：如何更新 Skill 到最新版本？</b></summary>
 
 ```bash
 cd ~/.claude/skills/kingdee-ppt
 git pull origin main
-# 重启 Claude Code
+# 重启 Claude Code 生效
 ```
-
-或重新运行自动安装脚本。
 </details>
 
 <details>
-<summary><b>Q4：Qoderwork / Kiro 为什么不能直接生成文件？</b></summary>
+<summary><b>Q4：通义灵码方式为什么不能直接生成 .pptx 文件？</b></summary>
 
-Claude Code 的 Skill 机制支持直接执行终端命令（Node.js 脚本），而 Qoderwork / Kiro 的 Prompt 模板只能生成代码，需手动执行。推荐使用 Claude Code 获得完整体验。
+Claude Code 的 Skill 机制支持直接执行终端命令（Node.js 脚本）来生成文件，而通义灵码目前的自定义指令功能只能生成代码，需手动执行。推荐使用 Claude Code 获得完整体验。
 </details>
 
 <details>
 <summary><b>Q5：如何自定义品牌颜色？</b></summary>
 
-编辑 `style-guide.md` 中的颜色配置，修改后重启生效。或联系作者添加多品牌支持。
+编辑 `style-guide.md` 中的颜色配置（主色 `#1770EA` / 青色 `#00CBFF` / 金色 `#FFC000`），修改后重启 Claude Code 生效。
 </details>
 
 <details>
-<summary><b>Q6：批量生成多个 PPT 可以吗？</b></summary>
+<summary><b>Q6：可以批量生成多个 PPT 吗？</b></summary>
 
-每次对话生成一个文件。批量需求可通过 Claude CLI 编写循环脚本：
+每次对话生成一个 PPT 文件。批量需求可通过 Claude CLI 编写循环脚本实现：
 
 ```bash
 for file in ~/docs/*.md; do
-  claude chat "帮我把 $file 转换为金蝶风格汇报材料"
+  claude chat "帮我把 $file 转换为金蝶风格的汇报材料"
 done
 ```
 </details>
@@ -355,7 +316,7 @@ done
 
 ## 🤝 贡献指南
 
-欢迎贡献！无论是修复 bug、新增版式，还是完善文档。
+欢迎通过 Issue 和 Pull Request 改进这个项目！
 
 ```bash
 # 1. Fork 本仓库
@@ -370,44 +331,29 @@ git push origin feature/your-feature
 ```
 
 **可贡献的方向：**
-- 🎨 新增版式模板
-- 🧠 支持更多思维模型
-- 🎯 提升版式自动识别准确率
-- 📝 完善多平台使用文档
-- 🌐 多语言支持
+- 新增版式模板
+- 支持更多思维模型
+- 提升版式自动识别准确率
+- 完善多平台使用文档
 
 ---
 
 ## 📜 许可证
 
-[MIT License](LICENSE) - 欢迎使用、修改和分发。
-
----
-
-## 🙏 致谢
-
-- 金蝶国际软件集团 - 官方设计语言授权
-- Claude Code Team - Skill 机制支持
-- 社区用户 - 宝贵反馈和建议
-
----
-
-## 📬 联系方式
-
-- **作者**：钟伟纯（Wayne Zhong）
-- **部门**：金蝶国际软件集团 · 苍穹平台 · AI 平台生态产品部
-- **邮箱**：[weichun_zhong@kingdee.com](mailto:weichun_zhong@kingdee.com)
-- **反馈**：[提交 Issue](https://github.com/WayneZhon/KingDee-PPT-Skill/issues)
-- **Star**：[⭐ Star 本项目](https://github.com/WayneZhon/KingDee-PPT-Skill/stargazers)
+本项目采用 [MIT 许可证](LICENSE)，可自由使用、修改和分发。
 
 ---
 
 <div align="center">
 
-**让你的金蝶演示文稿更专业、更高效 🎉**
+**作者：钟伟纯（Wayne Zhong）**
 
-[![Fork](https://img.shields.io/github/forks/WayneZhon/KingDee-PPT-Skill?style=social)](https://github.com/WayneZhon/KingDee-PPT-Skill/fork)
-[![Star](https://img.shields.io/github/stars/WayneZhon/KingDee-PPT-Skill?style=social)](https://github.com/WayneZhon/KingDee-PPT-Skill/stargazers)
-[![Watch](https://img.shields.io/github/watchers/WayneZhon/KingDee-PPT-Skill?style=social)](https://github.com/WayneZhon/KingDee-PPT-Skill/watchers)
+金蝶国际软件集团 · 苍穹平台 · AI平台生态产品部
+
+[📧 weichun_zhong@kingdee.com](mailto:weichun_zhong@kingdee.com) · [🐛 提交反馈](https://github.com/WayneZhon/KingDee-PPT-Skill/issues)
+
+---
+
+*让你的金蝶演示文稿更专业、更高效 🎉*
 
 </div>
