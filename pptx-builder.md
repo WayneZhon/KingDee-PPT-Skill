@@ -43,12 +43,12 @@ const A = {
   LOGO_W:         loadAsset('logo_white.png'),
 };
 const SEC_BGS    = [A.BG_SEC_A, A.BG_SEC_B, A.BG_SEC_C];
-const COLOR_SEQ  = ['1770EA', '00CBFF', '00C7C7', 'AF6EFF', 'FFC000'];
+const COLOR_SEQ  = ['2971EB', '22AAFE', '05C8C8', '966EFF', 'FFB61A'];
 
 // ③ Shadow 工厂（必须每次 new，避免 PptxGenJS 对象变异 bug）
 const mkSh  = () => ({ type:'outer', blur:12, offset:4, angle:135, color:'000000', opacity:0.10 });
 const mkShS = () => ({ type:'outer', blur:6,  offset:2, angle:135, color:'000000', opacity:0.07 });
-const mkShB = () => ({ type:'outer', blur:16, offset:6, angle:135, color:'1770EA',  opacity:0.12 });
+const mkShB = () => ({ type:'outer', blur:16, offset:6, angle:135, color:'2971EB',  opacity:0.12 });
 
 // ④ 粘贴 layout-presets.md 中的所有通用函数
 // addLogo / addFooter / addContentTitle / bentoCard / 所有版式函数...
@@ -400,7 +400,7 @@ async function bentoCardWithLogo(slide, opts, logoMap) {
     x: titleX, y: titleY,
     w: w - (titleX - x) - 0.18, h: 0.36,
     fontSize: 13, bold: true,
-    color: textColor || (bgColor === '1770EA' || bgColor === '00CBFF' ? 'FFFFFF' : '1A1A3E'),
+    color: textColor || (bgColor === '2971EB' || bgColor === '22AAFE' ? 'FFFFFF' : '1A1A3E'),
     fontFace: 'Microsoft YaHei',
     valign: 'middle',
   });
@@ -412,7 +412,7 @@ async function bentoCardWithLogo(slide, opts, logoMap) {
       x: x + 0.18, y: bulletY,
       w: w - 0.36, h: h - (bulletY - y) - 0.12,
       fontSize: 11,
-      color: textColor || (bgColor === '1770EA' ? 'FFFFFF' : '555555'),
+      color: textColor || (bgColor === '2971EB' ? 'FFFFFF' : '555555'),
       fontFace: 'Microsoft YaHei',
       valign: 'top',
       lineSpacingMultiple: 1.35,

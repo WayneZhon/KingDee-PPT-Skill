@@ -12,11 +12,13 @@ description: 将内容转化为金蝶官方风格的完整 .pptx 幻灯片文件
 
 ## 使用前必读（每次生成都要读）
 
-**按顺序读取以下三个文件后再开始任何操作：**
-
+**立即读取：**
 1. `style-guide.md` — 品牌色、字体、精确坐标、Logo 规范、背景图
-2. `layout-presets.md` — 12 种标准版式 + 6 种思维模型版式的完整 PptxGenJS 代码模板
-3. `pptx-builder.md` — 技术构建流程、QA 规范、常见陷阱
+
+**按需读取（第三阶段生成文件时才读）：**
+2. `layout-presets.md` — 29 种版式的完整 PptxGenJS 代码模板（仅生成阶段读取）
+3. `pptx-builder.md` — 技术构建流程、QA 规范、常见陷阱（仅生成阶段读取）
+4. `references/ai-brand-logos.md` — AI 品牌 Logo 映射表（仅当内容涉及 AI 品牌/大模型关键词时读取）
 
 ---
 
@@ -92,12 +94,14 @@ description: 将内容转化为金蝶官方风格的完整 .pptx 幻灯片文件
 ## 第零点五阶段：AI 品牌 Logo 识别（lobe-icons 自动嵌入）
 
 > 在完成 Phase 0 思维模型识别后、进入第一阶段前，**扫描全文识别 AI 品牌/平台/模型关键词**，并在内容脚本阶段为对应页面标注 logo 嵌入指令。
+>
+> ⚠️ 映射表在 `references/ai-brand-logos.md`，仅当检测到 AI 品牌关键词时才读取该文件。
 
 ---
 
 ### 0.5.1 扫描触发条件
 
-满足以下任意一条即触发扫描：
+满足以下任意一条即触发扫描（并读取 `references/ai-brand-logos.md`）：
 
 - 内容中出现 **AI 品牌名称**（如 DeepSeek、通义千问、华为云等）
 - 内容中出现 **大模型/AI 平台描述**（如"接入 GPT-4"、"调用文心一言"、"基于 Claude"）
@@ -107,81 +111,19 @@ description: 将内容转化为金蝶官方风格的完整 .pptx 幻灯片文件
 
 ### 0.5.2 品牌识别映射表
 
-> ✅ 经过 `@lobehub/icons-static-svg` 本地安装验证，以下所有 slug 均真实存在。
-> 彩色版：slug 加 `-color` 后缀（如 `deepseek-color`）；文字版：加 `-text` 后缀。
+> 📄 完整映射表见 `references/ai-brand-logos.md`，以下为常用示例：
 
-#### 🌐 国际 AI 大模型 & 平台
+| 常见品牌 | lobe-icons Slug | 彩色版 |
+|---------|-----------------|--------|
+| OpenAI / GPT | `openai` | 无 |
+| Claude / Anthropic | `claude` | `claude-color` ✅ |
+| DeepSeek | `deepseek` | `deepseek-color` ✅ |
+| 华为云 / 盘古 | `huaweicloud` | `huaweicloud-color` ✅ |
+| 阿里云 / 通义 | `alibabacloud` | `alibabacloud-color` ✅ |
+| 文心一言 / 百度 | `wenxin` | `wenxin-color` ✅ |
+| MCP 协议 | `mcp` | 无 |
 
-| 用户内容关键词 | lobe-icons Slug | 备注 |
-|--------------|-----------------|------|
-| OpenAI / ChatGPT / GPT-4 / o1 / o3 | `openai` | 无彩色版，纯黑白 |
-| Claude / Anthropic / Claude Code | `claude` / `claudecode` | `claude-color` 有彩色版 |
-| Gemini / Google AI / Bard | `gemini` | `gemini-color` ✅ |
-| DeepSeek / 深度求索 | `deepseek` | `deepseek-color` ✅ |
-| Llama / Meta AI / Meta | `metaai` / `meta` | ⚠️ `llama` 不存在，用 `metaai` |
-| Mistral | `mistral` | `mistral-color` ✅ |
-| Cohere | `cohere` | `cohere-color` ✅ |
-| HuggingFace | `huggingface` | `huggingface-color` ✅ |
-| AWS / Amazon | `aws` | `aws-color` ✅ |
-| Amazon Bedrock | `bedrock` | `bedrock-color` ✅ |
-| Azure / Microsoft Azure | `azure` | `azure-color` ✅ |
-| Azure AI / Copilot | `azureai` / `copilot` | `azureai-color` ✅ |
-| Microsoft | `microsoft` | `microsoft-color` ✅ |
-| Google Cloud | `googlecloud` | `googlecloud-color` ✅ |
-| Groq | `groq` | 无彩色版 |
-| Perplexity | `perplexity` | `perplexity-color` ✅ |
-| Midjourney | `midjourney` | 无彩色版 |
-| Stable Diffusion / Stability AI | `stability` | `stability-color` ✅ |
-| Ollama（本地模型） | `ollama` | 无彩色版 |
-| GitHub Copilot | `githubcopilot` | 无彩色版 |
-| GitHub | `github` | 无彩色版 |
-| Cursor（AI IDE） | `cursor` | 无彩色版 |
-
-#### 🇨🇳 中国 AI 大模型 & 云平台
-
-| 用户内容关键词 | lobe-icons Slug | 备注 |
-|--------------|-----------------|------|
-| 通义千问 / Qwen | `qwen` | `qwen-color` ✅ |
-| 阿里云 / Aliyun / 百炼 | `alibabacloud` / `bailian` | `alibabacloud-color` ✅ |
-| Alibaba / 阿里巴巴（集团） | `alibaba` | `alibaba-color` ✅ |
-| 文心一言 / ERNIE / 百度 | `wenxin` / `baidu` | `wenxin-color` ✅ |
-| 百度智能云 | `baiducloud` | `baiducloud-color` ✅ |
-| 豆包 / Doubao | `doubao` | `doubao-color` ✅ |
-| 字节跳动 / ByteDance | `bytedance` | `bytedance-color` ✅ |
-| Kimi / 月之暗面 | `moonshot` | 无彩色版 |
-| 智谱 / ChatGLM / GLM / ZhipuAI | `chatglm` / `zhipu` | `chatglm-color` ✅ |
-| 混元 / 腾讯 Hunyuan | `hunyuan` | `hunyuan-color` ✅ |
-| 腾讯云 / Tencent Cloud | `tencentcloud` / `tencent` | `tencentcloud-color` ✅ |
-| 华为 / Huawei（集团） | `huawei` | `huawei-color` ✅ |
-| 华为云 / HuaweiCloud / 盘古 | `huaweicloud` | `huaweicloud-color` ✅ ← 优先用此 |
-| 讯飞 / 星火 / IFLYTEK Spark | `spark` | `spark-color` ✅ |
-| 百川 / Baichuan | `baichuan` | 无彩色版 |
-| 零一万物 / Yi / 01.AI | `yi` | `yi-color` ✅ |
-| MiniMax / 海螺 | `minimax` | `minimax-color` ✅ |
-| 智谱 CodeGeeX / 代码助手 | `codegeex` | 无彩色版 |
-| 360智脑 / 360 AI | `ai360` | `ai360-color` ✅ |
-| Coze / 扣子（字节） | `coze` | 无彩色版 |
-| FastGPT / 知识库平台 | `fastgpt` | `fastgpt-color` ✅ |
-
-#### 🔧 AI 开发基础设施（Skill 生态高频）
-
-| 用户内容关键词 | lobe-icons Slug | 备注 |
-|--------------|-----------------|------|
-| MCP / Model Context Protocol | `mcp` | 无彩色版，⭐ 苍穹Skill生态必备 |
-| LangChain | `langchain` | 确认存在 |
-| LlamaIndex | `llamaindex` | `llamaindex-color` ✅ |
-| CrewAI | `crewai` | 无彩色版 |
-| Suno（音乐AI） | `suno` | 无彩色版 |
-| Runway（视频AI） | `runway` | 无彩色版 |
-| Pika（视频AI） | `pika` | 无彩色版 |
-| DALL-E | `dalle` | 无彩色版 |
-
-> **CDN 地址格式**：
-> - npmmirror（国内首选，优先）：`https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/{slug}.svg`
-> - unpkg（国际备用）：`https://unpkg.com/@lobehub/icons-static-svg@latest/icons/{slug}.svg`
-> - PNG fallback：`https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/icons/{slug}.png`
->
-> **彩色版规则**：深色（主蓝/品青）卡片背景 → 优先用 `{slug}-color`，浅色背景 → 用原色 `{slug}`
+> **CDN 地址**：npmmirror（首选）`https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/{slug}.svg`
 
 ---
 
@@ -448,11 +390,17 @@ description: 将内容转化为金蝶官方风格的完整 .pptx 幻灯片文件
 
 ## 第三阶段：生成文件
 
-参照 `pptx-builder.md` 执行：
+**第一步：读取生成阶段必需文件**
 
 ```
-读取 style-guide.md + layout-presets.md（含6种模型模板）
-  ↓
+Read `layout-presets.md` → 获取版式代码模板
+Read `pptx-builder.md`  → 获取构建流程规范
+If AI品牌logo标注存在 → Read `references/ai-brand-logos.md`
+```
+
+**第二步：执行构建流程**
+
+```
 编写 /home/claude/build_pptx.js
   ↓
 node build_pptx.js
