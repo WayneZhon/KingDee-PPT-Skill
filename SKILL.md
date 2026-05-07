@@ -1,18 +1,100 @@
 ---
 name: kingdee-ppt
-description: 将内容转化为金蝶官方风格的完整 .pptx 幻灯片文件。当用户说「做PPT」「做个PPT」「做汇报材料」「做演示文稿」「生成deck」「生成幻灯片」「整理成幻灯片」「按金蝶模板整理」「make a presentation」「create a slide deck」「output slides」，或上传 .pptx/.docx 要求转化/重排为金蝶风格时，必须使用此Skill。只要涉及PPT、幻灯片、汇报材料、演讲稿输出，就应触发。
+description: 将内容转化为金蝶官方风格的完整幻灯片文件（.pptx 或 .html）。当用户说「做PPT」「做个PPT」「做汇报材料」「做演示文稿」「生成deck」「生成幻灯片」「整理成幻灯片」「按金蝶模板整理」「make a presentation」「create a slide deck」「output slides」「HTML幻灯片」「交互式演示」「网页版PPT」「web slides」，或上传 .pptx/.docx 要求转化/重排为金蝶风格时，必须使用此Skill。只要涉及PPT、幻灯片、汇报材料、演讲稿输出（PPTX或HTML格式），就应触发。
 ---
 
-# 金蝶 PPT 生成 Skill v4.0
+## Preamble (run first)
 
-基于官方金蝶集团 2026 版 PPT 模板，直接生成完整 `.pptx` 文件。官方背景图和 Logo 内嵌，零配置可用。
-> v4.0：废弃场景选择 → 内容驱动智能版式匹配 · 逐页分析内容特征推荐最适合版式
+```bash
+_KD_CHECK="kingdee-ppt-update-check"
+if ! command -v kingdee-ppt-update-check &>/dev/null; then
+  _KD_CHECK="$(npm root -g)/kingdee-ppt/bin/kingdee-ppt-update-check"
+fi
+_UPD=$("$_KD_CHECK" 2>/dev/null || true)
+[ -n "$_UPD" ] && echo "$_UPD" || true
+```
+
+If output shows `UPGRADE_AVAILABLE <old> <new>`: inform user "kingdee-ppt **v{new}** is available (you're on v{old}). Run `kingdee-ppt-upgrade` to update." Do NOT auto-upgrade unless user explicitly confirms. Continue with current workflow.
+
+# 金蝶 PPT/HTML 幻灯片生成 Skill v7.1
+
+基于官方金蝶集团 2026 版 PPT 模板，支持 **HTML 交互式演示** 与 **PPTX 可编辑文件** 两种输出。默认先构建 HTML deck，再根据用户选择的输出格式交付或导出。官方背景图和 Logo 内嵌，零配置可用。
+> v7.1：新增 Bento Motion 风格变体 — Tailwind v4 + GSAP ScrollTrigger，纯白底 + Apple 滚动动效，可选风格切换
+>       风格对比：Classic（传统PPT）vs Bento Motion（科技发布）
+> v7.0：HTML-first 架构 — 融合 huashu-design 最佳实践，HTML 是第一公民，PPTX 是可选导出
+>       新增：html2pptx.js + export_deck_pptx.mjs → 真文本框可编辑 PPTX 导出
+>       新增：设计方向顾问（模糊需求时推荐 3 个风格选项）
+>       新增：Anti AI-slop 规则（禁紫渐变/emoji图标/Inter字体）
+> v6.0：HTML 原子组件系统 — 借鉴 open-design，放弃固定版式编号，采用组件+网格自由组合模式
+> v5.0：HTML 输出模式 → 交互式网页幻灯片，键盘导航、触摸滑动、动画效果
 
 ---
 
-## 简化三阶段工作流（v4.0）
+## HTML 风格选择（v7.1 新增）
+
+**双风格体系**：Classic（默认）与 Bento Motion（可选）
+
+| 维度 | Classic（默认）| Bento Motion（科技感）|
+|------|---------------|---------------------|
+| **背景** | 冰蓝底/渐变封面 | 纯白 `#FFFFFF` |
+| **网格** | 12 份比例系统 | Bento Grid span（1/2/4 列）|
+| **字号对比** | 标题 18-28pt / 正文 16pt | Hero 数字 80-160pt / 正文 14pt |
+| **动效** | Intersection Observer fade | GSAP ScrollTrigger（Apple 式）|
+| **中英文** | 中文为主 | 中文大字粗体 + 英文小字点缀 |
+| **图形** | 复杂 SVG/图表 | 勾线简洁图形 |
+| **CDN** | 无外部依赖 | Tailwind v4 + GSAP + Font Awesome |
+| **PPTX 导出** | **支持**（html2pptx.js）| **不支持**（走 PDF）|
+| **适用场景** | 正式汇报、领导层、政府客户 | 产品发布、科技受众、创新展示 |
+
+**触发词**：
+- 用户说「Bento风格」「Apple动效」「科技感」「现代感」→ **Bento Motion**
+- 内容是科技产品/AI/SaaS/开发者工具 → **推荐 Bento Motion**
+- 默认 → **Classic**
+
+---
+
+## 文件读取顺序（v5.1 新增）
 
 ```
+Phase 0 开始前必须按顺序读取以下文件：
+
+1. design-tokens.md    → 设计变量常量（COLORS/COLOR_SEQ/RADIUS/SHADOWS/SPACING/FONT）
+2. layout-schema.md    → 版式参数命名规范（bgColor/textColor 统一命名）
+3. rhythm-templates.md → 节奏模板（页面组合预设 + 场景匹配）
+4. style-guide.md      → 视觉规范（品牌色/字体/间距）
+5. layout-base.md      → 通用辅助函数（loadAsset/addLogo/addFooter/addContentTitle/bentoCard）
+6. layout-fixed.md     → 固定版式（封面/目录/章节/结尾：版式01-03,10）
+7. layout-content.md   → 内容版式（要点/数据/对比/流程/图文/时间轴：版式04-09）
+8. layout-advanced.md  → 高级版式（数据看板/Bento/架构/特性/矩阵/金句/沉浸/焦点：版式11-18）
+9. layout-models.md    → 思维模型版式（金字塔/PDCA/SWOT/黄金圈/5W1H/SCQA/IPD：版式19-25）
+10. layout-special.md  → 特殊版式（图标行/半出血/悬浮统计/对比栏：版式26-29 + 速查表）
+11. pptx-builder.md    → 构建流程规范（资源加载/QA清单）
+
+⚠️ design-tokens.md 和 layout-schema.md 是新增文件，必须最先读取。
+⚠️ COLOR_SEQ/阴影工厂定义已迁移至 design-tokens.md，禁止在其他文件重复定义。
+⚠️ layout-presets.md 已拆分为 6 个子文件（layout-base/fixed/content/advanced/models/special），按需读取。
+```
+
+---
+
+## HTML-first 工作流（v7.0）
+
+> **核心理念**：HTML 是第一公民，PPTX 是可选导出。先做能浏览器演讲的 HTML deck，再根据需要导出可编辑 PPTX。
+
+```
+──────────────────────────────────────────────────
+  统一流程（Phase F → 0 → 1 → 2 → H → X）
+──────────────────────────────────────────────────
+
+Phase F：输出格式选择（⚠️ 用户未明确指定格式时触发）
+  F.1 → 使用 AskUserQuestion 询问输出格式：
+         · HTML 交互式演示 — 浏览器演讲、支持动画、可部署 Vercel、可导出 PDF
+         · PPTX 可编辑文件 — 传统 PowerPoint、可二次编辑、离线演示
+  F.2 → 若选 HTML → 记住 OUTPUT_FORMAT=html，进入 Phase 0
+  F.3 → 若选 PPTX → 记住 OUTPUT_FORMAT=pptx，进入 Phase 0
+         后续 Phase H 须严格遵守 html2pptx.js 4 条硬约束，完成后自动进入 Phase X
+  F.4 → 用户已明确说「HTML」「网页版」「PPTX」「可编辑PPT」「PowerPoint」→ 跳过此阶段，直接赋值 OUTPUT_FORMAT
+
 Phase 0：内容结构分析（核心引擎）
   0.1 → 读取用户内容（文字/大纲/文档）
   0.2 → 逐页分析内容特征（要点数量、层级关系、对比关系、数据图表）
@@ -20,13 +102,68 @@ Phase 0：内容结构分析（核心引擎）
   0.4 → 推荐最适合版式（每页单独分析，不套场景模板）
   0.5 → AI品牌Logo识别（如有AI品牌关键词）
 
+Phase 0.5：设计方向顾问（⚠️ 仅当需求模糊时触发）
+  0.5.1 → 若用户需求模糊（如"做个PPT介绍我们的产品"），触发顾问模式
+  0.5.2 → 从 3 种金蝶风格方向推荐选项：
+         · 风格 A：沉稳专业（深藏青 + 数据卡片 + 金字塔）
+         · 风格 B：活力创新（品青渐变 + Bento Grid + 时间轴）
+         · 风格 C：简洁克制（白底 + 要点列表 + 对比栏）
+  0.5.3 → 用户选择后，进入 Phase 1
+
 Phase 1：大纲+版式推荐
   1.1 → 输出大纲，每页标注推荐版式+推荐理由
   1.2 → 用户确认/调整版式 → 如需调整，标注新版式
 
-Phase 2：内容脚本+生成
+Phase 2：内容脚本
   2.1 → 输出内容脚本（含排版指令）
-  2.2 → 用户确认 → 生成文件 → 视觉QA → 交付
+  2.2 → 用户确认 → 进入 HTML 生成
+
+Phase H：HTML 生成（v7.0 核心输出）
+  ┌─ H.0 风格选择（新增 v7.1）
+  │   ├─ 用户说「Bento风格」「Apple动效」「科技感」「现代感」→ 跳转 Phase H.Bento
+  │   ├─ 内容是科技产品/AI/SaaS/开发者工具 → 推荐 Bento Motion，问用户确认
+  │   └─ 默认 → Classic 风格（现有流程）
+  │
+  ┌─ Phase H.Classic（默认流程）
+  │   H.0 → Read `html-kingdee-preflight.md` → 预检清单
+  │   H.1 → Read `html-kingdee-template.md` → HTML 结构 + JS 功能
+  │   H.2 → Read `html-kingdee-style.md` → CSS 品牌色 + 响应式
+  │   H.3 → Read `html-kingdee-components.md` → 原子组件
+  │   H.4 → Read `html-kingdee-grids.md` → 网格比例系统
+  │   H.5 → Read `html-kingdee-typography.md` → 字体配对
+  │   H.6 → Read `html-kingdee-presets.md` → CSS 版式预设（按需）
+  │   H.7 → 生成多文件 HTML deck（index.html + slides/*.html）
+  │         ⚠️ OUTPUT_FORMAT=pptx 时，必须严格遵守 html2pptx.js 4 条硬约束
+  │         ⚠️ OUTPUT_FORMAT=html 时，可正常使用动画、渐变、背景图
+  │   H.8 → 浏览器预览 → 用户确认
+  │   H.9 → 若 OUTPUT_FORMAT=html → 交付 HTML
+  │         若 OUTPUT_FORMAT=pptx → 进入 Phase X
+  │
+  └─ Phase H.Bento（Bento Motion 风格，v7.1 新增）
+      H.B0 → Read `html-bento-template.md` → Tailwind v4 + GSAP CDN 骨架
+      H.B1 → Read `html-bento-components.md` → Bento Grid 卡片 + 勾线图形
+      H.B2 → Read `html-bento-presets.md` → 10 种 Bento 版式预设
+      H.B3 → Read `html-bento-motion.md` → GSAP ScrollTrigger 动效库
+      H.B4 → 生成单文件 HTML deck（全页滚动 + scroll-triggered 动效）
+             ⚠️ Bento Motion 不支持 PPTX 导出（使用 CDN + Tailwind）
+             ⚠️ 若 OUTPUT_FORMAT=pptx → 拒绝并建议改用 Classic 风格
+      H.B5 → 浏览器预览 → 用户确认 → 交付 HTML
+
+Phase X：PPTX 导出（⚠️ 仅当 OUTPUT_FORMAT=pptx 时执行）
+  X.1 → 检查 HTML 是否已按 html2pptx.js 4 条硬约束生成
+  X.2 → 若合规 → 执行 export_deck_pptx.mjs
+  X.3 → 若未合规 → 列出具体错误项，建议修改 HTML 或改用 PDF
+  X.4 → 输出 .pptx 文件 → 交付
+
+──────────────────────────────────────────────────
+  html2pptx.js 4 条硬约束（PPTX 导出必需）
+──────────────────────────────────────────────────
+1. body 固定 960pt × 540pt（匹配 LAYOUT_WIDE 13.333" × 7.5"）
+2. 所有文字包在 <p>/<h1>-<h6>/<ul>/<ol> 里（禁止裸文本 div）
+3. <p>/<h*> 标签自身不能有 background/border/shadow（放外层 div）
+4. 不用 CSS gradient、不用 background-image（用 <img> 标签）
+
+⚠️ 不遵守以上约束的 HTML 无法导出 PPTX，只能交付 HTML 或 PDF。
 ```
 
 ---
@@ -68,6 +205,17 @@ Phase 2：内容脚本+生成
 - 相邻3页不得使用同一版式
 - 纯文字要点页不得连续超过2页
 - 每页至少包含一种视觉元素（图标、数字、色块、图片）
+
+### 场景 → 默认结构偏好
+
+| 场景 | 自动包含页面 | 首选版式组合 |
+|------|------------|------------|
+| 内部汇报 | 仅内容页 | 要点列表 + 数据卡片 + 时间轴 |
+| 伙伴赋能 | 封面 + 内容 + 结尾 | 架构示意 + 流程图 + 对比页 |
+| 客户大会 | 全结构（封面/目录/章节/内容/结尾） | 数据卡片 + 图文并排 + 章节页 + 思维模型 |
+| 方案提案 | 封面 + 目录 + 内容 | 对比页 + 流程图 + 数据卡片 + PDCA/SWOT |
+
+> ⚠️ 场景偏好作为**默认建议**，用户明确指定结构时按用户要求执行。
 
 ### 0.3 版式推荐输出格式
 
@@ -533,6 +681,25 @@ present_files 交付
 
 ---
 
+## Anti AI-slop 规则（禁止事项）
+
+> 防止生成内容落入AI模板通病，确保输出符合金蝶企业级标准。
+
+| 问题 | ❌ 禁止 | ✅ 正确做法 |
+|-----|------|---------|
+| 过度渐变 | 全页渐变背景、彩虹配色 | 金蝶标准背景图或品牌色系 |
+| 空洞图标 | generic 灯泡/齿轮/火箭图标 | 金蝶品牌图标或无图标纯文字 |
+| 英文套话 | "Think Big" "Innovation" "Future" | 金蝶价值观：致良知、走正道、行王道 |
+| 无意义装饰 | 抽象波浪、点阵、几何图形 | 只用官方气泡圆元素 |
+| 章节编号滥用 | 01/02/03/04 但无章节内容 | 有实质章节才用章节分隔页 |
+| 段落过长 | 单条要点超过50字 | ≤30字，每页≤5要点 |
+| 数据空洞 | "显著提升""大幅增长"无数字 | 必须有具体数字或明确来源 |
+| 堆砌热词 | AI Agent、大模型、数字化转型滥用 | 每页最多1个技术热词，配具体场景 |
+| 假性对比 | 新旧对比但无差异描述 | 左右对比页必须列出≥3个差异点 |
+| 时间轴空洞 | 只有年份无事件描述 | 每个时间点必须有事件+影响 |
+
+---
+
 ## 金蝶品牌知识库
 
 | 类别 | 内容 |
@@ -553,19 +720,208 @@ present_files 交付
 
 | 情况 | 处理方式 |
 |------|---------|
-| 用户直接提供完整内容 | 直接进入 Phase 0 内容分析，输出大纲+版式推荐 |
+| 用户未指定输出格式 | 触发 Phase F，询问 HTML vs PPTX，选择后再进入 Phase 0 |
+| 用户直接提供完整内容 | 若格式已明确，直接进入 Phase 0 内容分析；否则先走 Phase F |
+| 用户需求模糊（如"做个PPT介绍产品"） | 先触发 Phase F 选格式，再触发 Phase 0.5 设计方向顾问 |
 | 用户明确指定模型 | 跳过 Phase 0 扫描，直接采用指定模型版式 |
 | 用户说「不要思维模型」 | Phase 0 结果全部忽略，按标准版式处理 |
-| 用户说「直接生成」/「不用确认」 | 触发快速模式：Phase 0+1+2 合并输出，末尾一个确认问题 |
-| 用户只要内容脚本不要文件 | 完成 Phase 2.1 后停止 |
+| 用户说「直接生成」/「不用确认」 | 若格式未明确，先触发 Phase F；然后快速模式：Phase 0+1+2+H 合并输出，末尾一个确认问题 |
+| 用户只要内容脚本不要文件 | 完成 Phase 2 后停止 |
 | 用户说「不要封面/结尾」 | 记住偏好，大纲中删除对应页 |
 | 章节超过4个 | 建议合并或设附录，目录页最多4章 |
 | 单页内容过多 | 拆为2页，用承接标题「（一）」「（二）」 |
-| **用户要求修改某页** | ① 定位该页在 `build_pptx.js` 中的函数调用；② 仅修改该页的函数参数或版式调用；③ 重新执行完整的 node→转PDF→转图→视觉QA 流程；④ 确认后交付新文件（不要只修改脚本而不重新转图） |
 | 检测到4种以上模型 | 保留主要3种，其余降级为标准版式，大纲中注明 |
-| 用户上传已有 .pptx | 先用 python-pptx 解析脚本（见 `pptx-builder.md §3`）提取内容，再走完整三阶段重排为金蝶风格 |
-| 用户提供数据要求图表 | 收集数据后用 `pptx.addChart()` 插入（见 `pptx-builder.md §10`），在大纲标注「[图表页-折线/柱/饼]」 |
-| 内容含 AI 品牌/大模型关键词 | 触发 Phase 0.5 扫描，查映射表，大纲页标注 `[logo: slug]`，生成阶段调用 `preloadLobeIcons()` 批量拉取（见 `pptx-builder.md §10`） |
-| 用户说「不要 logo」/「不加 logo」 | 跳过 Phase 0.5，ALL_SLUGS 设为空数组，不调用 lobe-icons CDN |
-| lobe-icons 某个 slug 不存在 | 静默跳过，该格改用 emoji（如 🤖 🔬 ☁️），日志输出 `⚠️ lobe-icon 加载失败，跳过: {slug}` |
-| 网络环境无法访问 CDN | 先尝试 npmmirror，再尝试 unpkg，均失败则跳过 logo，PPT 正常生成不中断 |
+| 用户上传已有 .pptx | 提取内容后重排为金蝶风格 HTML deck |
+| 用户提供数据要求图表 | 收集数据后在 HTML 中用 CSS/Canvas 绘制，PPTX 导出时转为图片 |
+| 内容含 AI 品牌/大模型关键词 | 大纲标注 `[logo: slug]`，HTML 中用 lobe-icons SVG |
+| 用户说「不要 logo」 | 跳过 logo 拉取，不调用 CDN |
+| 用户中途要求切换输出格式 | 若未进入 Phase H，回退到 Phase F 重新选择；若已进入 Phase H，评估调整成本 |
+| **OUTPUT_FORMAT=pptx 且用户要求导出 PPTX** | 进入 Phase X，执行 `scripts/export_deck_pptx.mjs` |
+| **用户说「可编辑PPTX」/「要PPT文件」** | 设置 OUTPUT_FORMAT=pptx，Phase H 必须按 html2pptx 4 条硬约束执行 |
+| **html2pptx 导出失败** | 提示 HTML 不合规，列出具体错误，建议修改 HTML 或输出 PDF |
+| **OUTPUT_FORMAT=html 且用户只要 HTML** | 交付 HTML deck，可浏览器演讲或部署 Vercel，跳过 Phase X |
+| **用户要 PDF** | 用 Playwright 截图合并导出 PDF（⚠️ 动画丢失），不依赖 OUTPUT_FORMAT |
+
+---
+
+## HTML 输出详细规范（v7.0）
+
+> HTML 是第一公民，PPTX 是可选导出。本节规范 HTML deck 的生成和导出。
+
+### HTML 输出特点
+
+| 特点 | 说明 |
+|------|------|
+| **单文件** | 全部 CSS/JS 内联，零依赖，可直接浏览器打开 |
+| **交互式** | 键盘导航、触摸滑动、动画效果、进度条、导航点 |
+| **响应式** | `clamp()` 字号自适应，移动端/投影仪完美适配 |
+| **品牌一致** | 与 PPTX 共用相同的品牌色系、版式逻辑、内容密度规范 |
+| **可分享** | 支持 Vercel 一键部署（在线 URL）、Playwright PDF 导出 |
+
+---
+
+### Phase H3：HTML 生成流程
+
+**第一步：读取必需文件**
+
+```
+Read `html-kingdee-template.md` → HTML 结构 + SlidePresentation 类 + 动画触发
+Read `html-kingdee-style.md`    → CSS 自定义属性 + 视口锁定 + 响应式断点
+Read `html-kingdee-presets.md`  → 按需加载版式 CSS（只复制使用的版式）
+If AI品牌logo标注存在 → 使用 lobe-icons CDN SVG
+```
+
+**第二步：生成 HTML 文件**
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{演示标题} | 金蝶</title>
+  <style>
+    /* 1. CSS 自定义属性（品牌色系） */
+    /* 2. 视口锁定基础样式 */
+    /* 3. 响应式断点 */
+    /* 4. 动画与过渡 */
+    /* 5. 卡片通用样式 */
+    /* 6. 品牌色语义映射 */
+    /* 7. 版式 CSS 类（按需加载） */
+  </style>
+</head>
+<body>
+  <div class="progress-bar"></div>
+  <div class="nav-dots"></div>
+  <!-- 幻灯片内容 -->
+  <script>
+    /* SlidePresentation 类 */
+    /* Intersection Observer */
+    /* 键盘/触摸/滚轮导航 */
+  </script>
+</body>
+</html>
+```
+
+**第三步：浏览器预览**
+
+```
+写入 {主题}.html 文件
+  ↓
+本地 HTTP 服务预览（可选）
+  ↓
+用户确认 → 交付文件 / 部署 URL
+```
+
+---
+
+### HTML 版式类名对照表
+
+| PPTX 版式编号 | HTML CSS 类名 | 结构示例 |
+|--------------|---------------|---------|
+| 01 封面页 | `.slide-cover` | `<section class="slide slide-cover">` |
+| 02 目录页 | `.slide-toc` | `<section class="slide slide-toc">` |
+| 03 章节分隔 | `.slide-section` | `<section class="slide slide-section">` |
+| 04 要点列表 | `.slide-bullets` | `<section class="slide slide-bullets">` |
+| 05 数据卡片 | `.slide-data-cards` | `.data-card-grid` + `.data-card` |
+| 11 数据看板 | `.slide-dashboard` | `.dashboard-grid` + `.dashboard-card` |
+| 12 Bento Grid | `.slide-bento` | `.bento-grid` + `.bento-main` + `.bento-card` |
+| 19 金字塔 | `.slide-pyramid` | `.pyramid-wrapper` + `.pyramid-top/.middle/.bottom` |
+| 20 PDCA | `.slide-pdca` | `.pdca-grid` + `.pdca-cell` + `.color-plan/.do/.check/.act` |
+| 21 SWOT | `.slide-swot` | `.swot-grid` + `.swot-cell` + `.color-strength/.weakness/.opportunity/.threat` |
+| 22 黄金圈 | `.slide-golden` | `.golden-wrapper` + `.golden-circles` + `.golden-explain` |
+| 25 IPD五看 | `.slide-ipd` | `.ipd-grid` + `.ipd-card` + `.color-view-1/2/3/4/5` |
+| 16 金句 | `.slide-quote` | `<section class="slide slide-quote">` |
+| 28 悬浮统计 | `.slide-floating-stats` | `.floating-grid` + `.floating-stat` |
+
+---
+
+### HTML 导航功能
+
+| 操作 | 触发方式 |
+|------|---------|
+| 上一页 | `←` / `↑` / `PageUp` |
+| 下一页 | `→` / `↓` / `PageDown` / `Space` |
+| 首页 | `Home` |
+| 结尾 | `End` |
+| 左滑（移动端） | 下一页 |
+| 右滑（移动端） | 上一页 |
+| 鼠标滚轮 | 下一页/上一页（300ms 防抖） |
+
+---
+
+### HTML 内容密度规范（与 PPTX 一致）
+
+| 幻灯片类型 | 最大内容 | 版面占比上限 |
+|-----------|---------|------------|
+| 标题页（封面） | 1 标题 + 1 副标题 + 元信息 | 50% |
+| 内容页 | 1 标题 + 4–6 要点 | 70% |
+| 特征网格 | 1 标题 + 最多 6 张卡片 | 80% |
+| 数据看板 | 3 个数字卡片 | 75% |
+
+```css
+/* CSS 强制留白 */
+.slide-content {
+  padding: clamp(0.3rem, 1vw, 0.5rem);
+}
+
+.text-block {
+  max-width: min(80vw, 800px);
+}
+```
+
+---
+
+### HTML 图标使用（Emoji）
+
+与 PPTX 版一致，使用 Microsoft YaHei 字体渲染 emoji：
+
+```html
+<span class="icon">📊</span>  <!-- 数据看板 -->
+<span class="icon">⚡</span>  <!-- 快速响应 -->
+<span class="icon">🤖</span>  <!-- AI/智能体 -->
+<span class="icon">🚀</span>  <!-- 起飞/增长 -->
+```
+
+---
+
+### HTML 分享与导出（可选）
+
+**本地预览**
+
+```bash
+python3 -m http.server 8080 --directory .
+# 或
+npx serve .
+```
+
+**Vercel 部署**
+
+```bash
+vercel --prod
+# 输出在线 URL，可分享给他人
+```
+
+**PDF 导出（⚠️ 动画效果丢失）**
+
+```bash
+# 使用 Playwright 以 1920×1080 分辨率截图并合并
+node scripts/export-pdf.js {主题}.html output.pdf
+```
+
+---
+
+### 常见情况处理（HTML 模式）
+
+| 情况 | 处理方式 |
+|------|---------|
+| 用户说「HTML幻灯片」/「网页版PPT」/「交互式演示」 | 自动选择 HTML 输出格式 |
+| 用户说「传统PPT」/「PPTX文件」 | 选择 PPTX 输出格式 |
+| 用户明确指定输出格式 | 按用户指定执行 |
+| 用户说「不要动画」 | HTML 中移除 `.animate-*` 类，跳过动画触发 |
+| 用户说「不要导航点」 | 移除 `.nav-dots` 容器 |
+| 用户说「可编辑」/「内联编辑」 | 启用 `contenteditable`，⚠️ 导出前必须清除编辑状态 |
+| 用户要求 PDF 导出 | 警告动画丢失，使用 Playwright 截图合并 |
+| 用户要求在线分享 | 使用 Vercel CLI 部署，输出 URL |
+| 移动端预览 | 响应式自动适配，触摸滑动导航生效 |
+| 用户上传已有 .pptx 要求转 HTML | 先提取内容（Phase 4），再走 HTML 流程 |
