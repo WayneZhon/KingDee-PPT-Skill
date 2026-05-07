@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+# kingdee-ppt-update-check — periodic version check via npm registry
+#
+# Output (one line, or nothing):
+#   UPGRADE_AVAILABLE <old> <new>  — npm registry has newer version
+#   (nothing)                      — up to date, snoozed, disabled, or check skipped
+#
+# Env overrides (for testing):
+#   KINGDEE_PPT_PKG_DIR     — override auto-detected package root
+#   KINGDEE_PPT_STATE_DIR   — override ~/.kingdee-ppt state directory
+#   NPM_REGISTRY            — override npm registry URL
+set -euo pipefail
+
+PKG_DIR="${KINGDEE_PPT_PKG_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
+STATE_DIR="${KINGDEE_PPT_STATE_DIR:-$HOME/.kingdee-ppt}"
+CACHE_FILE="$STATE_DIR/last-update-check"
+SNOOZE_FILE="$STATE_DIR/update-snoozed"
+VERSION_FILE="$PKG_DIR/VERSION"
+NPM_REGISTRY="${NPM_REGISTRY:-https://registry.npmjs.org/}"
+
+# ─── Force flag (busts cache + snooze) ────────────────────────
+if [ "${1:-}" = "--force" ]; then
+  rm -f "$CACHE_FILE"
+  rm -f "$SNOOZE_FILE"
+fi
+
+# ─── Step 0: Check if updates are disabled ────────────────────
+if [ "${KINGDEE_PPT_UPDATE_CHECK:-}" = "false" ]; then
+  exit 0
+fi
+
+# ─── Snooze helper ────────────────────────────────────────────
+# check_snooze <remote_version>
+#   Returns 0 if snoozed (should stay quiet), 1 if not snoozed.
+#
+#   Snooze file format: <version> <level> <epoch>
+#   Level durations: 1=24h, 2=48h, 3+=7d
+#   New version (version mismatch) resets snooze.
+check_snooze() {
+  local remote_ver="$1"
+  if [ ! -f "$SNOOZE_FILE" ]; then
+    return 1
+  fi
+  local snoozed_ver snoozed_level snoozed_epoch
+  snoozed_ver="$(awk '{print $1}' "$SNOOZE_FILE" 2>/dev/null || true)"
+  snoozed_level="$(awk '{print $2}' "$SNOOZE_FILE" 2>/dev/null || true)"
+  snoozed_epoch="$(awk '{print $3}' "$SNOOZE_FILE" 2>/dev/null || true)"
+
+  if [ -z "$snoozed_ver" ] || [ -z "$snoozed_level" ] || [ -z "$snoozed_epoch" ]; then
+    return 1
+  fi
+  case "$snoozed_level" in *[!0-9]*) return 1 ;; esac
+  case "$snoozed_epoch" in *[!0-9]*) return 1 ;; esac
+
+  if [ "$snoozed_ver" != "$remote_ver" ]; then
+    return 1
+  fi
+
+  local duration
+  case "$snoozed_level" in
+    1) duration=86400 ;;
+    2) duration=172800 ;;
+    *) duration=604800 ;;
+  esac
+
+  local now
+  now="$(date +%s)"
+  local expires=$(( snoozed_epoch + duration ))
+  if [ "$now" -lt "$expires" ]; then
+    return 0
+  fi
+  return 1
+}
+
+# ─── Step 1: Read local version ───────────────────────────────
+LOCAL=""
+if [ -f "$VERSION_FILE" ]; then
+  LOCAL="$(cat "$VERSION_FILE" 2>/dev/null | tr -d '[:space:]')"
+fi
+if [ -z "$LOCAL" ]; then
+  exit 0
+fi
+
+# ─── Step 2: Check cache freshness ────────────────────────────
+# UP_TO_DATE: 60 min TTL (detect new releases quickly)
+# UPGRADE_AVAILABLE: 720 min TTL (keep nagging)
+if [ -f "$CACHE_FILE" ]; then
+  CACHED="$(cat "$CACHE_FILE" 2>/dev/null || true)"
+  case "$CACHED" in
+    UP_TO_DATE*)        CACHE_TTL=60 ;;
+    UPGRADE_AVAILABLE*) CACHE_TTL=720 ;;
+    *)                  CACHE_TTL=0 ;;
+  esac
+
+  STALE=$(find "$CACHE_FILE" -mmin +$CACHE_TTL 2>/dev/null || true)
+  if [ -z "$STALE" ] && [ "$CACHE_TTL" -gt 0 ]; then
+    case "$CACHED" in
+      UP_TO_DATE*)
+        CACHED_VER="$(echo "$CACHED" | awk '{print $2}')"
+        if [ "$CACHED_VER" = "$LOCAL" ]; then
+          exit 0
+        fi
+        ;;
+      UPGRADE_AVAILABLE*)
+        CACHED_OLD="$(echo "$CACHED" | awk '{print $2}')"
+        if [ "$CACHED_OLD" = "$LOCAL" ]; then
+          CACHED_NEW="$(echo "$CACHED" | awk '{print $3}')"
+          if check_snooze "$CACHED_NEW"; then
+            exit 0
+          fi
+          echo "$CACHED"
+          exit 0
+        fi
+        ;;
+    esac
+  fi
+fi
+
+# ─── Step 3: Slow path — fetch remote version from npm ────────
+mkdir -p "$STATE_DIR"
+
+REMOTE=""
+REMOTE="$(npm view kingdee-ppt version --registry "$NPM_REGISTRY" 2>/dev/null || true)"
+REMOTE="$(echo "$REMOTE" | tr -d '[:space:]')"
+
+if ! echo "$REMOTE" | grep -qE '^[0-9]+\.[0-9.]+$'; then
+  echo "UP_TO_DATE $LOCAL" > "$CACHE_FILE"
+  exit 0
+fi
+
+if [ "$LOCAL" = "$REMOTE" ]; then
+  echo "UP_TO_DATE $LOCAL" > "$CACHE_FILE"
+  exit 0
+fi
+
+# Versions differ — upgrade available
+echo "UPGRADE_AVAILABLE $LOCAL $REMOTE" > "$CACHE_FILE"
+if check_snooze "$REMOTE"; then
+  exit 0
+fi
+
+echo "UPGRADE_AVAILABLE $LOCAL $REMOTE"

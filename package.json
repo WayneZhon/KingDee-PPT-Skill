@@ -1,5 +1,45 @@
 {
+  "name": "kingdee-ppt",
+  "version": "1.1.0",
+  "description": "金蝶官方风格 PPT/HTML 幻灯片生成 Skill — 将内容转化为 .pptx 或交互式 HTML deck",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kingdee/kingdee-ppt.git"
+  },
+  "bin": {
+    "kingdee-ppt-update-check": "./bin/kingdee-ppt-update-check",
+    "kingdee-ppt-upgrade": "./bin/kingdee-ppt-upgrade"
+  },
+  "files": [
+    "SKILL.md",
+    "VERSION",
+    "Changelog",
+    "README.md",
+    "assets/",
+    "references/",
+    "scripts/",
+    "bin/",
+    "*.md",
+    "*.js"
+  ],
+  "scripts": {
+    "postinstall": "bash scripts/postinstall.sh"
+  },
   "dependencies": {
-    "pptxgenjs": "^4.0.1"
-  }
+    "pptxgenjs": "^4.0.1",
+    "playwright": "^1.40.0",
+    "glob": "^10.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "claude-code",
+    "skill",
+    "kingdee",
+    "ppt",
+    "presentation",
+    "slides"
+  ]
 }

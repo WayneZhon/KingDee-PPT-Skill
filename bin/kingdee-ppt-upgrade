@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# kingdee-ppt-upgrade — upgrade kingdee-ppt to latest npm version
+#
+# Usage:
+#   kingdee-ppt-upgrade              — upgrade to latest
+#   kingdee-ppt-upgrade --setup      — create symlink only, no upgrade
+#   kingdee-ppt-upgrade --version    — show current version
+set -euo pipefail
+
+PKG_DIR="${KINGDEE_PPT_PKG_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
+STATE_DIR="${KINGDEE_PPT_STATE_DIR:-$HOME/.kingdee-ppt}"
+SKILL_DIR="$HOME/.claude/skills/kingdee-ppt"
+
+# ─── --version ────────────────────────────────────────────────
+if [ "${1:-}" = "--version" ]; then
+  if [ -f "$PKG_DIR/VERSION" ]; then
+    cat "$PKG_DIR/VERSION"
+  else
+    echo "unknown"
+  fi
+  exit 0
+fi
+
+# ─── --setup ──────────────────────────────────────────────────
+if [ "${1:-}" = "--setup" ]; then
+  mkdir -p "$HOME/.claude/skills"
+  if [ -d "$SKILL_DIR" ] && [ ! -L "$SKILL_DIR" ]; then
+    mv "$SKILL_DIR" "$SKILL_DIR.bak.$(date +%s)"
+    echo "Backed up existing $SKILL_DIR"
+  fi
+  ln -sf "$PKG_DIR" "$SKILL_DIR"
+  echo "Skill symlink created: $SKILL_DIR -> $PKG_DIR"
+  exit 0
+fi
+
+# ─── Detect install type ──────────────────────────────────────
+if [ ! -f "$PKG_DIR/package.json" ]; then
+  echo "ERROR: kingdee-ppt package not found at expected path: $PKG_DIR"
+  exit 1
+fi
+
+OLD_VERSION=""
+if [ -f "$PKG_DIR/VERSION" ]; then
+  OLD_VERSION="$(cat "$PKG_DIR/VERSION" 2>/dev/null | tr -d '[:space:]')"
+fi
+
+echo "Upgrading kingdee-ppt from v${OLD_VERSION:-unknown}..."
+
+# ─── Run npm upgrade ──────────────────────────────────────────
+npm install -g kingdee-ppt@latest
+
+# Refresh PKG_DIR (npm may have relocated it)
+PKG_DIR="$(npm root -g)/kingdee-ppt"
+NEW_VERSION=""
+if [ -f "$PKG_DIR/VERSION" ]; then
+  NEW_VERSION="$(cat "$PKG_DIR/VERSION" 2>/dev/null | tr -d '[:space:]')"
+fi
+
+# ─── Ensure symlink ───────────────────────────────────────────
+mkdir -p "$HOME/.claude/skills"
+if [ -d "$SKILL_DIR" ] && [ ! -L "$SKILL_DIR" ]; then
+  mv "$SKILL_DIR" "$SKILL_DIR.bak.$(date +%s)"
+fi
+ln -sf "$PKG_DIR" "$SKILL_DIR"
+
+# ─── Clear update state ───────────────────────────────────────
+rm -f "$STATE_DIR/last-update-check"
+rm -f "$STATE_DIR/update-snoozed"
+
+echo ""
+echo "kingdee-ppt upgraded: v${OLD_VERSION:-unknown} → v${NEW_VERSION:-unknown}"
+echo "Skill symlink: $SKILL_DIR -> $PKG_DIR"
+
+# ─── Show Changelog summary ───────────────────────────────────
+if [ -f "$PKG_DIR/Changelog" ] && [ -n "$OLD_VERSION" ] && [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
+  echo ""
+  echo "What's new (v$NEW_VERSION):"
+  # Extract the top section of Changelog (from first [version] to next blank line or next [version])
+  awk '/^\[[0-9].*\]/{if(found)exit;found=1}found' "$PKG_DIR/Changelog" | head -20 || true
+fi
