@@ -16,9 +16,11 @@ _UPD=$("$_KD_CHECK" 2>/dev/null || true)
 
 If output shows `UPGRADE_AVAILABLE <old> <new>`: inform user "kingdee-ppt **v{new}** is available (you're on v{old}). Run `kingdee-ppt-upgrade` to update." Do NOT auto-upgrade unless user explicitly confirms. Continue with current workflow.
 
-# 金蝶 PPT/HTML 幻灯片生成 Skill v7.1
+# 金蝶 PPT/HTML 幻灯片生成 Skill v7.2
 
 基于官方金蝶集团 2026 版 PPT 模板，支持 **HTML 交互式演示** 与 **PPTX 可编辑文件** 两种输出。默认先构建 HTML deck，再根据用户选择的输出格式交付或导出。官方背景图和 Logo 内嵌，零配置可用。
+> v7.2：新增 HTML 编辑模式 — 右上角开关 + 点击任意文字直接修改 + 一键保存 HTML/PPTX 导出
+>       所有组件（stat-card/callout/pillar-card/step-card）自动支持 contenteditable
 > v7.1：新增 Bento Motion 风格变体 — Tailwind v4 + GSAP ScrollTrigger，纯白底 + Apple 滚动动效，可选风格切换
 >       风格对比：Classic（传统PPT）vs Bento Motion（科技发布）
 > v7.0：HTML-first 架构 — 融合 huashu-design 最佳实践，HTML 是第一公民，PPTX 是可选导出
@@ -734,13 +736,16 @@ present_files 交付
 | 用户上传已有 .pptx | 提取内容后重排为金蝶风格 HTML deck |
 | 用户提供数据要求图表 | 收集数据后在 HTML 中用 CSS/Canvas 绘制，PPTX 导出时转为图片 |
 | 内容含 AI 品牌/大模型关键词 | 大纲标注 `[logo: slug]`，HTML 中用 lobe-icons SVG |
-| 用户说「不要 logo」 | 跳过 logo 拉取，不调用 CDN |
+| 用户说「不要 logo」 | 跳过 logo 拂取，不调用 CDN |
 | 用户中途要求切换输出格式 | 若未进入 Phase H，回退到 Phase F 重新选择；若已进入 Phase H，评估调整成本 |
 | **OUTPUT_FORMAT=pptx 且用户要求导出 PPTX** | 进入 Phase X，执行 `scripts/export_deck_pptx.mjs` |
 | **用户说「可编辑PPTX」/「要PPT文件」** | 设置 OUTPUT_FORMAT=pptx，Phase H 必须按 html2pptx 4 条硬约束执行 |
 | **html2pptx 导出失败** | 提示 HTML 不合规，列出具体错误，建议修改 HTML 或输出 PDF |
 | **OUTPUT_FORMAT=html 且用户只要 HTML** | 交付 HTML deck，可浏览器演讲或部署 Vercel，跳过 Phase X |
 | **用户要 PDF** | 用 Playwright 截图合并导出 PDF（⚠️ 动画丢失），不依赖 OUTPUT_FORMAT |
+| **用户说「编辑好了」/「保存修改」** | 提示用户在 HTML 页面点击「保存 HTML」按钮导出 |
+| **用户编辑后要导出 PPTX** | 提示保存 HTML → 运行 CLI 命令 `node scripts/export_deck_pptx.mjs` |
+| **用户说「不要编辑功能」** | HTML 中移除 EditController 和编辑工具栏 UI |
 
 ---
 
@@ -925,3 +930,65 @@ node scripts/export-pdf.js {主题}.html output.pdf
 | 用户要求在线分享 | 使用 Vercel CLI 部署，输出 URL |
 | 移动端预览 | 响应式自动适配，触摸滑动导航生效 |
 | 用户上传已有 .pptx 要求转 HTML | 先提取内容（Phase 4），再走 HTML 流程 |
+
+---
+
+## HTML 编辑模式（v7.2 新增）
+
+> **HTML 输出自带编辑功能**：右上角开关 + 点击任意文字直接修改 + 一键保存导出。
+
+### 编辑模式 UI
+
+| 元素 | 功能 |
+|------|------|
+| 右上角 Toggle Switch | 开启/关闭编辑模式 |
+| 「保存 HTML」按钮 | 清除编辑状态 + 导出干净 HTML 文件 |
+| 「导出 PPTX」按钮 | 提示运行 CLI 命令导出 PPTX |
+
+### 自动可编辑元素
+
+以下元素开启编辑模式后自动支持 `contenteditable`：
+
+| 元素类型 | CSS 选择器 | 说明 |
+|---------|-----------|------|
+| 标题 | `h1, h2, h3, h4, h5, h6` | 所有标题可编辑 |
+| 正文 | `p, li` | 段落和列表项可编辑 |
+| 卡片标题 | `.card-title, .pillar-title, .step-title` | 卡片标题可编辑 |
+| 卡片描述 | `.pillar-desc, .step-desc` | 卡片描述可编辑 |
+| 统计数字 | `.stat-nb, .stat-label, .stat-note` | 数据卡片内容可编辑 |
+| 引用文字 | `.callout-text` | 金句内容可编辑 |
+
+**不可编辑元素**：序号 `.pillar-ic, .step-nb`、logo、背景图、导航 UI
+
+### 编辑模式操作流程
+
+```
+1. 打开 HTML 文件 → 右上角自动显示编辑工具栏
+2. 点击 Toggle 开启编辑模式 → 所有文字元素出现蓝色虚线悬停框
+3. 点击任意文字 → 进入编辑状态，出现蓝色实线边框
+4. 修改内容 → 点击其他位置或 Tab 跳到下一元素
+5. 点击「保存 HTML」→ 导出干净的 HTML 文件（无编辑 UI）
+6. 如需 PPTX → 点击「导出 PPTX」查看 CLI 命令提示
+```
+
+### 导出时清除状态清单
+
+| 状态 | 清除方式 |
+|------|---------|
+| `contenteditable` 属性 | `el.removeAttribute('contenteditable')` |
+| `.editable-text` class | `el.classList.remove('editable-text')` |
+| `.edit-active` class | `el.classList.remove('edit-active')` |
+| `.edit-toolbar.hidden` | `toolbar.classList.add('hidden')` |
+| `.nav-hint.show` | `navHint.classList.remove('show')` |
+| `.nav-dot.active` | `dot.classList.remove('active')` |
+
+⚠️ **CRITICAL**: 不清除这些状态会导致导出的 HTML/PPTX 包含编辑 UI 和临时样式。
+
+### 用户编辑后的处理
+
+| 用户操作 | 处理方式 |
+|---------|---------|
+| 用户说「编辑好了，保存」 | 执行保存 HTML 流程 |
+| 用户说「导出 PPTX」 | 提示 CLI 命令，若已保存 HTML 则可直接运行 |
+| 用户说「我改错了，恢复原内容」 | 无法恢复，建议重新生成原始 HTML |
+| 用户编辑后要求调整版式 | 需重新走 Phase H 生成流程，编辑内容不保留 |

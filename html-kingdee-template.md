@@ -850,44 +850,354 @@ node scripts/export-pdf.js input.html output.pdf
 
 ---
 
-## 内联编辑（Opt-In，谨慎启用）
+## 内联编辑功能（v3.1 默认启用）
 
-若用户明确要求「可编辑」，启用 `contenteditable`：
+> **HTML 输出自带编辑模式**：右上角开关 + 一键保存 HTML + PPTX 导出提示。
+
+### 编辑模式 UI 结构
 
 ```html
-<h1 data-editable class="cover-title">{标题}</h1>
-<p data-editable class="cover-subtitle">{副标题}</p>
+<!-- 右上角编辑工具栏 -->
+<div id="edit-toolbar" class="edit-toolbar">
+  <label class="edit-switch">
+    <input type="checkbox" id="editToggle">
+    <span class="switch-track"></span>
+    <span class="switch-label">编辑模式</span>
+  </label>
+  <div class="edit-actions">
+    <button id="saveHtmlBtn" class="edit-btn">保存 HTML</button>
+    <button id="exportPptxBtn" class="edit-btn primary">导出 PPTX</button>
+  </div>
+</div>
 ```
 
-**⚠️ CRITICAL**：导出前必须清除编辑状态
+### 编辑模式 CSS（必须包含）
 
-```javascript
-function exportCleanHTML() {
-  // 1. 移除 contenteditable 属性
-  document.querySelectorAll('[contenteditable]').forEach(el => {
-    el.removeAttribute('contenteditable');
-  });
+```css
+/* ─── 编辑工具栏 ─── */
+.edit-toolbar {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  font-size: 14px;
+  font-family: var(--font-sans);
+  transition: opacity 0.3s, transform 0.3s;
+}
 
-  // 2. 移除 .edit-active 类
-  document.querySelectorAll('.edit-active').forEach(el => {
-    el.classList.remove('edit-active');
-  });
+.edit-toolbar.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-10px);
+}
 
-  // 3. 移除提示元素的 show/active 类
-  document.querySelector('.nav-hint')?.classList.remove('show');
-  document.querySelectorAll('.nav-dot.active').forEach(dot => {
-    dot.classList.remove('active');
-  });
+/* Toggle Switch */
+.edit-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
 
-  // 4. 获取 outerHTML
-  const html = document.documentElement.outerHTML;
+.edit-switch input { display: none; }
 
-  // 5. 恢复编辑状态（如果需要）
-  // ...
+.switch-track {
+  width: 36px;
+  height: 20px;
+  background: #E7F1FF;
+  border-radius: 10px;
+  position: relative;
+  transition: background 0.2s;
+}
 
-  return html;
+.switch-track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: #BFBFBF;
+  border-radius: 50%;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.edit-switch input:checked + .switch-track {
+  background: #2971EB;
+}
+
+.edit-switch input:checked + .switch-track::after {
+  transform: translateX(16px);
+  background: #FFFFFF;
+}
+
+.switch-label {
+  color: #373838;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+/* 编辑按钮组 */
+.edit-actions {
+  display: none;
+  gap: 8px;
+}
+
+.edit-actions.visible {
+  display: flex;
+}
+
+.edit-btn {
+  padding: 6px 12px;
+  border: 1px solid #E7F1FF;
+  border-radius: 4px;
+  background: #FEFEF9;
+  color: #373838;
+  cursor: pointer;
+  font-size: 13px;
+  transition: opacity 0.15s;
+}
+
+.edit-btn:hover {
+  opacity: 0.85;
+}
+
+.edit-btn.primary {
+  background: #2971EB;
+  color: #FFFFFF;
+  border-color: #2971EB;
+}
+
+/* 可编辑文字样式 */
+.editable-text {
+  cursor: text;
+  transition: outline 0.15s, background 0.15s;
+  min-height: 1.2em;
+}
+
+.editable-text:hover {
+  outline: 1px dashed #22AAFE;
+  outline-offset: 2px;
+}
+
+.edit-active {
+  outline: 2px solid #2971EB;
+  outline-offset: 2px;
+  background: rgba(41, 113, 235, 0.05);
+}
+
+/* 编辑模式下的幻灯片 */
+body.edit-mode-enabled {
+  cursor: default;
+}
+
+body.edit-mode-enabled .slide {
+  cursor: text;
 }
 ```
+
+### EditController 类（完整实现）
+
+```javascript
+// ─── 编辑控制器 ───
+class EditController {
+  constructor() {
+    this.toolbar = document.getElementById('edit-toolbar');
+    this.toggle = document.getElementById('editToggle');
+    this.editMode = false;
+    this.editables = null;
+    this.init();
+  }
+
+  init() {
+    if (!this.toolbar || !this.toggle) return;
+
+    // Toggle 事件
+    this.toggle.addEventListener('change', () => {
+      this.editMode = this.toggle.checked;
+      this.setEditable(this.editMode);
+      this.updateUI();
+    });
+
+    // 保存 HTML 按钮
+    document.getElementById('saveHtmlBtn')?.addEventListener('click', () => {
+      this.saveHTML();
+    });
+
+    // 导出 PPTX 按钮
+    document.getElementById('exportPptxBtn')?.addEventListener('click', () => {
+      this.exportPPTX();
+    });
+  }
+
+  // 设置可编辑状态
+  setEditable(enabled) {
+    // 可编辑元素选择器：标题、段落、列表项、卡片标题/数字/描述
+    const selector = 'h1, h2, h3, h4, h5, h6, p, li, .card-title, .stat-nb, .stat-label, .stat-note, .pillar-title, .pillar-desc, .step-title, .step-desc, .callout-text';
+
+    this.editables = document.querySelectorAll(selector);
+
+    this.editables.forEach(el => {
+      if (enabled) {
+        el.setAttribute('contenteditable', 'true');
+        el.classList.add('editable-text');
+
+        // 编辑状态事件
+        el.addEventListener('focus', () => el.classList.add('edit-active'));
+        el.addEventListener('blur', () => el.classList.remove('edit-active'));
+
+        // 阻止导航事件（避免编辑时触发翻页）
+        el.addEventListener('keydown', (e) => {
+          if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space'].includes(e.key)) {
+            e.stopPropagation();
+          }
+        });
+      } else {
+        el.removeAttribute('contenteditable');
+        el.classList.remove('editable-text', 'edit-active');
+      }
+    });
+
+    // 更新 body 状态
+    document.body.classList.toggle('edit-mode-enabled', enabled);
+  }
+
+  // 更新 UI 显示
+  updateUI() {
+    const actions = document.querySelector('.edit-actions');
+    if (actions) {
+      actions.classList.toggle('visible', this.editMode);
+    }
+  }
+
+  // 清除编辑状态，生成干净 HTML
+  cleanHTML() {
+    // 1. 移除所有 contenteditable 属性
+    document.querySelectorAll('[contenteditable]').forEach(el => {
+      el.removeAttribute('contenteditable');
+    });
+
+    // 2. 移除编辑相关 class
+    document.querySelectorAll('.editable-text, .edit-active').forEach(el => {
+      el.classList.remove('editable-text', 'edit-active');
+    });
+
+    // 3. 隐藏工具栏
+    this.toolbar?.classList.add('hidden');
+
+    // 4. 移除导航提示的 show 状态
+    document.querySelector('.nav-hint')?.classList.remove('show');
+
+    // 5. 移除 nav-dot 的 active 状态
+    document.querySelectorAll('.nav-dot.active').forEach(dot => {
+      dot.classList.remove('active');
+    });
+
+    // 6. 重置 progress-bar（可选）
+    // document.getElementById('progressBar')?.style.width = '0%';
+
+    // 7. 获取干净的 outerHTML
+    const cleanHtml = document.documentElement.outerHTML;
+
+    // 8. 恢复编辑状态（如果编辑模式仍开启）
+    if (this.editMode) {
+      this.setEditable(true);
+      this.toolbar?.classList.remove('hidden');
+    }
+
+    return cleanHtml;
+  }
+
+  // 保存 HTML 文件
+  saveHTML() {
+    const cleanHtml = this.cleanHTML();
+    const blob = new Blob([cleanHtml], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+
+    // 文件名：从 title 提取，去掉 "| 金蝶" 后缀
+    const title = document.title.replace(' | 金蝶', '').replace(/[^\w\u4e00-\u9fa5]/g, '_');
+    const filename = `${title}_edited_${Date.now().toString(36)}.html`;
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    console.log(`✓ HTML 已保存: ${filename}`);
+  }
+
+  // 导出 PPTX（前端触发，服务端处理）
+  exportPPTX() {
+    const cleanHtml = this.cleanHTML();
+
+    // 方案 A：发送到服务端 API（如果有）
+    // fetch('/api/export-pptx', {
+    //   method: 'POST',
+    //   body: cleanHtml,
+    //   headers: { 'Content-Type': 'text/html' }
+    // }).then(res => res.blob()).then(blob => { ... });
+
+    // 方案 B：提示用户运行 CLI 命令（当前实现）
+    const msg = `
+PPTX 导出需要运行服务端脚本。
+
+已为你准备好导出命令：
+
+1. 先保存当前 HTML（点击「保存 HTML」按钮）
+2. 在终端运行：
+   node scripts/export_deck_pptx.mjs --slides slides --out output.pptx
+
+注意：PPTX 导出要求 HTML 符合以下约束：
+- body 固定 1920×1080 或 960pt×540pt
+- 所有文字在 <p>/<h1>-<h6>/<ul>/<ol> 标签内
+- 不使用 CSS gradient 和 background-image
+    `;
+
+    alert(msg);
+  }
+}
+
+// ─── 初始化编辑控制器 ───
+document.addEventListener('DOMContentLoaded', () => {
+  new EditController();
+});
+```
+
+### 启用编辑模式的完整流程
+
+在 `<script>` 标签末尾添加：
+
+```javascript
+// ─── 初始化 ───
+document.addEventListener('DOMContentLoaded', () => {
+  new SlidePresentation();
+  new EditController();  // ← 新增：编辑控制器
+});
+```
+
+### 导出时必须清除的状态清单
+
+| 状态 | 清除方式 |
+|------|---------|
+| `contenteditable` 属性 | `el.removeAttribute('contenteditable')` |
+| `.editable-text` class | `el.classList.remove('editable-text')` |
+| `.edit-active` class | `el.classList.remove('edit-active')` |
+| `.edit-toolbar.hidden` | `toolbar.classList.add('hidden')` |
+| `.nav-hint.show` | `navHint.classList.remove('show')` |
+| `.nav-dot.active` | `dot.classList.remove('active')` |
+
+⚠️ **CRITICAL**: 不清除这些状态会导致导出的 HTML/PPTX 包含编辑 UI 和临时样式。
 
 ---
 

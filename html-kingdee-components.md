@@ -44,6 +44,8 @@
 </div>
 ```
 
+> **编辑模式支持**：`.stat-label`、`.stat-nb`、`.stat-note` 自动可编辑，无需额外标记。
+
 ### CSS 定义
 
 ```css
@@ -105,6 +107,8 @@
 </div>
 ```
 
+> **编辑模式支持**：`.callout-text` 自动可编辑，金句内容可随时修改。
+
 ### CSS 定义
 
 ```css
@@ -162,6 +166,8 @@
   <div class="pillar-desc">CLAUDE.md + 项目知识库 + 护栏文件</div>
 </div>
 ```
+
+> **编辑模式支持**：`.pillar-title`、`.pillar-desc` 自动可编辑。序号 `.pillar-ic` 不可编辑。
 
 ### CSS 定义
 
@@ -222,6 +228,8 @@
   <div class="step-desc">AI 帮我起草初稿</div>
 </div>
 ```
+
+> **编辑模式支持**：`.step-title`、`.step-desc` 自动可编辑。序号 `.step-nb` 不可编辑。
 
 ### CSS 定义
 
